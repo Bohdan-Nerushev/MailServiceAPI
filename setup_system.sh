@@ -9,8 +9,15 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-DOMAIN="lws.local"
-echo "--- Починаємо встановлення для домену $DOMAIN ---"
+DOMAIN="lehrwerkstatt"
+HOSTNAME="bnerushev.lehrwerkstatt"
+echo "--- Починаємо встановлення для домену $DOMAIN та хоста $HOSTNAME ---"
+
+# 0. Налаштування локального хостнейму
+echo "Налаштування /etc/hosts..."
+if ! grep -q "$HOSTNAME" /etc/hosts; then
+    echo "127.0.0.1 $HOSTNAME" >> /etc/hosts
+fi
 
 # 1. Оновлення репозиторіїв
 apt update
@@ -23,7 +30,7 @@ apt install -y postfix dovecot-imapd dovecot-pop3d
 
 # 3. Налаштування Postfix
 echo "Налаштування Postfix..."
-postconf -e "myhostname = mail.$DOMAIN"
+postconf -e "myhostname = $HOSTNAME"
 postconf -e "mydestination = \$myhostname, $DOMAIN, localhost.localdomain, localhost"
 postconf -e "home_mailbox = Maildir/"
 postconf -e "mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128"

@@ -21,6 +21,12 @@ pip install -r requirements.txt
 Використовуйте цю команду для запуску сервера:
 ```bash
 export PYTHONPATH=$PYTHONPATH:$(pwd) && source venv/bin/activate && python3 app/main.py
+
+
+================
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 
+================
+
 ```
 
 ---

@@ -19,6 +19,7 @@ def fetch_inbox(username, password, limit=10):
                     "from": msg.from_,
                     "subject": msg.subject,
                     "date": str(msg.date),
+                    "text": msg.text,
                     "seen": msg.flags
                 })
             return True, messages
