@@ -1,0 +1,326 @@
+nohup: всі аргументи проігноровані
+INFO:     Will watch for changes in these directories: ['/home/bnerushev/Desktop/Project/MailService']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [31277] using WatchFiles
+INFO:     Started server process [31281]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53636 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53648 - "GET /docs HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/services/user_manager.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31281]
+WARNING:  WatchFiles detected changes in 'app/services/user_manager.py'. Reloading...
+INFO:     Started server process [31535]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routes/users.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31535]
+WARNING:  WatchFiles detected changes in 'app/routes/users.py'. Reloading...
+INFO:     Started server process [31551]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routes/users.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31551]
+INFO:     Started server process [31624]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31624]
+INFO:     Started server process [31999]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/services/smtp_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31999]
+WARNING:  WatchFiles detected changes in 'app/services/smtp_service.py'. Reloading...
+INFO:     Started server process [32468]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/routes/mail.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32468]
+WARNING:  WatchFiles detected changes in 'app/routes/mail.py'. Reloading...
+INFO:     Started server process [32481]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32481]
+Traceback (most recent call last):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 965, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/bnerushev/Desktop/Project/MailService/app/main.py", line 8, in <module>
+    from app.routes import users, mail
+  File "/home/bnerushev/Desktop/Project/MailService/app/routes/mail.py", line 7, in <module>
+    class EmailSchema(BaseModel):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+             ^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 1005, in __get_pydantic_core_schema__
+    import_email_validator()
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 967, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+WARNING:  WatchFiles detected changes in 'app/services/imap_service.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/imap_service.py'. Reloading...
+Traceback (most recent call last):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 965, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/bnerushev/Desktop/Project/MailService/app/main.py", line 8, in <module>
+    from app.routes import users, mail
+  File "/home/bnerushev/Desktop/Project/MailService/app/routes/mail.py", line 7, in <module>
+    class EmailSchema(BaseModel):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+             ^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 1005, in __get_pydantic_core_schema__
+    import_email_validator()
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 967, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+WARNING:  WatchFiles detected changes in 'app/routes/mail.py'. Reloading...
+Traceback (most recent call last):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 965, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/bnerushev/Desktop/Project/MailService/app/main.py", line 8, in <module>
+    from app.routes import users, mail
+  File "/home/bnerushev/Desktop/Project/MailService/app/routes/mail.py", line 7, in <module>
+    class EmailSchema(BaseModel):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+             ^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 1005, in __get_pydantic_core_schema__
+    import_email_validator()
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 967, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+Traceback (most recent call last):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 965, in import_email_validator
+    import email_validator
+ModuleNotFoundError: No module named 'email_validator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 131, in _main
+    prepare(preparation_data)
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 246, in prepare
+    _fixup_main_from_path(data['init_main_from_path'])
+  File "/usr/lib/python3.12/multiprocessing/spawn.py", line 297, in _fixup_main_from_path
+    main_content = runpy.run_path(main_path,
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 286, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/bnerushev/Desktop/Project/MailService/app/main.py", line 22, in <module>
+    from app.routes import users, mail
+  File "/home/bnerushev/Desktop/Project/MailService/app/routes/mail.py", line 7, in <module>
+    class EmailSchema(BaseModel):
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_model_construction.py", line 648, in complete_model_class
+    schema = gen_schema.generate_schema(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 729, in generate_schema
+    schema = self._generate_schema_inner(obj)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1023, in _generate_schema_inner
+    return self._model_schema(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 856, in _model_schema
+    {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1228, in _generate_md_field_schema
+    schema, metadata = self._common_field_schema(name, field_info, decorators)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 1282, in _common_field_schema
+    schema = self._apply_annotations(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2227, in _apply_annotations
+    schema = get_inner_schema(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_schema_generation_shared.py", line 83, in __call__
+    schema = self._handler(source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 2203, in inner_handler
+    schema = self._generate_schema_from_get_schema_method(obj, source_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/_internal/_generate_schema.py", line 919, in _generate_schema_from_get_schema_method
+    schema = get_schema(
+             ^^^^^^^^^^^
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 1005, in __get_pydantic_core_schema__
+    import_email_validator()
+  File "/home/bnerushev/Desktop/Project/MailService/venv/lib/python3.12/site-packages/pydantic/networks.py", line 967, in import_email_validator
+    raise ImportError("email-validator is not installed, run `pip install 'pydantic[email]'`") from e
+ImportError: email-validator is not installed, run `pip install 'pydantic[email]'`
+WARNING:  WatchFiles detected changes in 'venv/lib64/python3.12/site-packages/dns/rdtypes/dsbase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/SRV.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/SSHFP.py', 'venv/lib64/python3.12/site-packages/dns/set.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/APL.py', 'venv/lib64/python3.12/site-packages/dns/dnssectypes.py', 'venv/lib64/python3.12/site-packages/dns/_ddr.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/WALLET.py', 'venv/lib64/python3.12/site-packages/dns/namedict.py', 'venv/lib64/python3.12/site-packages/dns/_features.py', 'venv/lib64/python3.12/site-packages/dns/_trio_backend.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/DNAME.py', 'venv/lib64/python3.12/site-packages/dns/_tls_util.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NSEC.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/AFSDB.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/tlsabase.py', 'venv/lib64/python3.12/site-packages/dns/win32util.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/DNSKEY.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CSYNC.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/KX.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/euibase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/RESINFO.py', 'venv/lib64/python3.12/site-packages/dns/rdataclass.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/SOA.py', 'venv/lib64/python3.12/site-packages/dns/rcode.py', 'venv/lib64/python3.12/site-packages/dns/inet.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/TSIG.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/OPENPGPKEY.py', 'venv/lib64/python3.12/site-packages/dns/tsigkeyring.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NSEC3.py', 'venv/lib64/python3.12/site-packages/dns/name.py', 'venv/lib64/python3.12/site-packages/dns/_asyncio_backend.py', 'venv/lib64/python3.12/site-packages/email_validator/deliverability.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/WKS.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/dsa.py', 'venv/lib64/python3.12/site-packages/dns/immutable.py', 'venv/lib64/python3.12/site-packages/dns/btreezone.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/EUI64.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/NSAP.py', 'venv/lib64/python3.12/site-packages/email_validator/rfc_constants.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/A.py', 'venv/lib64/python3.12/site-packages/dns/ttl.py', 'venv/lib64/python3.12/site-packages/dns/rdatatype.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/X25.py', 'venv/lib64/python3.12/site-packages/dns/renderer.py', 'venv/lib64/python3.12/site-packages/dns/opcode.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/RP.py', 'venv/lib64/python3.12/site-packages/dns/rdata.py', 'venv/lib64/python3.12/site-packages/dns/serial.py', 'venv/lib64/python3.12/site-packages/dns/asyncresolver.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/rsa.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/HTTPS.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CERT.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/SPF.py', 'venv/lib64/python3.12/site-packages/dns/asyncbackend.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/DSYNC.py', 'venv/lib64/python3.12/site-packages/dns/quic/_sync.py', 'venv/lib64/python3.12/site-packages/dns/_no_ssl.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CNAME.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/DS.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/HINFO.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NID.py', 'venv/lib64/python3.12/site-packages/dns/versioned.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/DLV.py', 'venv/lib64/python3.12/site-packages/dns/quic/_asyncio.py', 'venv/lib64/python3.12/site-packages/dns/edns.py', 'venv/lib64/python3.12/site-packages/email_validator/syntax.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CAA.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/LP.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/HIP.py', 'venv/lib64/python3.12/site-packages/dns/e164.py', 'venv/lib64/python3.12/site-packages/dns/message.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/IPSECKEY.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/L32.py', 'venv/lib64/python3.12/site-packages/email_validator/types.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/ecdsa.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/CH/__init__.py', 'venv/lib64/python3.12/site-packages/dns/btree.py', 'venv/lib64/python3.12/site-packages/dns/version.py', 'venv/lib64/python3.12/site-packages/dns/grange.py', 'venv/lib64/python3.12/site-packages/dns/zonetypes.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/PTR.py', 'venv/lib64/python3.12/site-packages/email_validator/validate_email.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/svcbbase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/OPT.py', 'venv/lib64/python3.12/site-packages/dns/tsig.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/NSAP_PTR.py', 'venv/lib64/python3.12/site-packages/email_validator/version.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NSEC3PARAM.py', 'venv/lib64/python3.12/site-packages/dns/rrset.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/L64.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/TKEY.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/AMTRELAY.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/TXT.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/SMIMEA.py', 'venv/lib64/python3.12/site-packages/dns/update.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/ZONEMD.py', 'venv/lib64/python3.12/site-packages/dns/quic/_trio.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/GPOS.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/RRSIG.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/cryptography.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/AAAA.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NINFO.py', 'venv/lib64/python3.12/site-packages/dns/_immutable_ctx.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/util.py', 'venv/lib64/python3.12/site-packages/dns/tokenizer.py', 'venv/lib64/python3.12/site-packages/dns/xfr.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/PX.py', 'venv/lib64/python3.12/site-packages/dns/wire.py', 'venv/lib64/python3.12/site-packages/dns/dnssec.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/EUI48.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/nsbase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/CH/A.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/txtbase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CDNSKEY.py', 'venv/lib64/python3.12/site-packages/email_validator/exceptions.py', 'venv/lib64/python3.12/site-packages/dns/asyncquery.py', 'venv/lib64/python3.12/site-packages/dns/node.py', 'venv/lib64/python3.12/site-packages/dns/ipv6.py', 'venv/lib64/python3.12/site-packages/dns/zonefile.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/CDS.py', 'venv/lib64/python3.12/site-packages/dns/quic/_common.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/mxbase.py', 'venv/lib64/python3.12/site-packages/dns/entropy.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/SVCB.py', 'venv/lib64/python3.12/site-packages/dns/nameserver.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/__init__.py', 'venv/lib64/python3.12/site-packages/dns/reversename.py', 'venv/lib64/python3.12/site-packages/dns/zone.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/NS.py', 'venv/lib64/python3.12/site-packages/dns/rdataset.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/NAPTR.py', 'venv/lib64/python3.12/site-packages/dns/transaction.py', 'venv/lib64/python3.12/site-packages/dns/query.py', 'venv/lib64/python3.12/site-packages/dns/ipv4.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/LOC.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/__init__.py', 'venv/lib64/python3.12/site-packages/dns/exception.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/MX.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/eddsa.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/IN/DHCID.py', 'venv/lib64/python3.12/site-packages/dns/flags.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/RT.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/__init__.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/__init__.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/TLSA.py', 'venv/lib64/python3.12/site-packages/dns/resolver.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/dnskeybase.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/URI.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/AVC.py', 'venv/lib64/python3.12/site-packages/dns/rdtypes/ANY/ISDN.py', 'venv/lib64/python3.12/site-packages/dns/enum.py', 'venv/lib64/python3.12/site-packages/dns/dnssecalgs/base.py', 'venv/lib64/python3.12/site-packages/email_validator/__main__.py', 'venv/lib64/python3.12/site-packages/dns/quic/__init__.py'. Reloading...
+INFO:     Started server process [33625]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

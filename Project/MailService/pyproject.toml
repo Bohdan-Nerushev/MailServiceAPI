@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "mail-service-api"
+version = "0.1.0"
+description = "REST API for managing Postfix/Dovecot mail server"
+authors = ["bnerushev"]
+readme = "readme.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+aiosmtplib = "*"
+imap-tools = "*"
+python-dotenv = "*"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

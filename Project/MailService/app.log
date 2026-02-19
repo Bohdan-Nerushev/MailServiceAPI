@@ -1,0 +1,22 @@
+2026-02-19 13:02:05,555 [INFO] app.services.user_manager: Команда виконана успішно: sudo useradd -m -s /usr/sbin/nologin first_user
+2026-02-19 13:02:05,802 [INFO] app.services.user_manager: Пароль для first_user успішно змінено
+2026-02-19 13:02:42,044 [INFO] app.services.user_manager: Пароль для first_user успішно змінено
+2026-02-19 13:02:59,988 [INFO] app.services.user_manager: Команда виконана успішно: sudo useradd -m -s /usr/sbin/nologin second_user
+2026-02-19 13:03:00,169 [INFO] app.services.user_manager: Пароль для second_user успішно змінено
+2026-02-19 13:03:14,410 [INFO] app.services.user_manager: Пароль для second_user успішно змінено
+2026-02-19 13:03:27,029 [INFO] app.services.user_manager: Команда виконана успішно: sudo useradd -m -s /usr/sbin/nologin _user
+2026-02-19 13:03:27,219 [INFO] app.services.user_manager: Пароль для _user успішно змінено
+2026-02-19 13:03:40,535 [INFO] app.services.user_manager: Команда виконана успішно: sudo userdel -r _user
+2026-02-19 13:03:51,668 [ERROR] app.services.user_manager: Помилка зміни пароля для _user: chpasswd: (користувач _user) помилка pam_chauthtok(), повідомлення:
+Помилка маніпуляції лексемою розпізнавання
+chpasswd: (рядок 1, користувач _user) пароль не змінено
+
+2026-02-19 13:04:34,715 [ERROR] app.services.smtp_service: Помилка SMTP: Error connecting to lws.local on port 587: [Errno -2] Name or service not known
+2026-02-19 13:07:06,243 [ERROR] app.services.smtp_service: Помилка SMTP: Error connecting to lws.local on port 587: [Errno -2] Name or service not known
+2026-02-19 13:07:16,726 [ERROR] app.services.smtp_service: Помилка SMTP: Error connecting to lws.local on port 587: [Errno -2] Name or service not known
+2026-02-19 13:08:39,070 [ERROR] app.services.smtp_service: Помилка SMTP: Error connecting to 127.0.0.1 on port 587: [Errno 111] Connection refused
+2026-02-19 13:17:16,791 [ERROR] app.services.smtp_service: Помилка SMTP: The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS).
+2026-02-19 13:17:54,561 [ERROR] app.services.smtp_service: Помилка SMTP: The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS).
+2026-02-19 13:22:17,921 [INFO] app.services.smtp_service: Лист успішно надіслано на first_user@lws.local
+2026-02-19 13:23:43,492 [ERROR] app.services.imap_service: Помилка IMAP (message): Response status "OK" expected, but "NO" received. Data: [b'[AUTHENTICATIONFAILED] Authentication failed.']
+2026-02-19 13:25:34,154 [INFO] app.services.user_manager: Команда виконана успішно: sudo userdel -r second_user
