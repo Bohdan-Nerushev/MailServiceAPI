@@ -48,3 +48,16 @@ def fetch_message_by_uid(username, password, uid):
     except Exception as e:
         logger.error(f"Помилка IMAP (message): {str(e)}")
         return False, str(e)
+
+def delete_message_by_uid(username, password, uid):
+    """Löscht eine E-Mail anhand ihrer UID."""
+    imap_server = os.getenv("IMAP_SERVER", "localhost")
+    
+    try:
+        with MailBox(imap_server).login(username, password, 'INBOX') as mailbox:
+            # Markiert die E-Mail als gelöscht und entfernt sie
+            mailbox.delete(uid)
+            return True, f"E-Mail mit UID {uid} wurde gelöscht"
+    except Exception as e:
+        logger.error(f"Fehler beim Löschen der E-Mail (UID {uid}): {str(e)}")
+        return False, str(e)

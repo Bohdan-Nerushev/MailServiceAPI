@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, EmailStr
 from app.services import smtp_service, imap_service
+from pydantic import Field
 
 router = APIRouter(prefix="/mail", tags=["E-Mail"])
-
-from pydantic import Field
 
 class EmailSchema(BaseModel):
     to: str = Field(..., examples=["admin@lehrwerkstatt"])
@@ -41,4 +40,12 @@ async def get_message(uid: str, username: str, x_password: str = Header(..., des
     success, result = imap_service.fetch_message_by_uid(username, x_password, uid)
     if not success:
         raise HTTPException(status_code=404, detail=f"Fehler: {result}")
+    return {"message": result}
+
+@router.delete("/message/{uid}")
+async def delete_message(uid: str, username: str, x_password: str = Header(..., description="Passwort des E-Mail-Kontos")):
+    """Eine E-Mail anhand ihrer UID dauerhaft löschen."""
+    success, result = imap_service.delete_message_by_uid(username, x_password, uid)
+    if not success:
+        raise HTTPException(status_code=400, detail=f"Fehler: {result}")
     return {"message": result}

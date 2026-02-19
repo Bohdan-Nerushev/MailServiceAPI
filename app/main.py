@@ -21,23 +21,37 @@ load_dotenv()
 
 from app.routes import users, mail
 
+# Tags Metadaten für die Reihenfolge im Swagger UI
+tags_metadata = [
+    {
+        "name": "System",
+        "description": "Betriebsstatus und Gesundheitsprüfung.",
+    },
+    {
+        "name": "Benutzer",
+        "description": "Verwaltung von Systembenutzern.",
+    },
+    {
+        "name": "E-Mail",
+        "description": "Senden und Empfangen von Nachrichten.",
+    },
+]
+
 app = FastAPI(
     title="Mail Service API",
     description="API zur Verwaltung des Mailservers (Postfix/Dovecot)",
-    version="0.1.0"
+    version="0.1.0",
+    openapi_tags=tags_metadata
 )
-
-# Підключаємо роути
-app.include_router(users.router)
-app.include_router(mail.router)
 
 from app.services import system_service
 
 @app.get("/health", tags=["System"])
 async def health_check():
-    """Überprüft den Status des API-Servers und der Mail-Dienste (Postfix/Dovecot)."""
+    """Überprüft den Status des API-Servers, der Mail-Dienste und der Server-Ressourcen."""
     postfix_active = system_service.get_service_status("postfix")
     dovecot_active = system_service.get_service_status("dovecot")
+    system_metrics = system_service.get_system_info()
     
     status = "OK" if postfix_active and dovecot_active else "DEGRADED"
     
@@ -48,11 +62,16 @@ async def health_check():
             "postfix": "active" if postfix_active else "inactive",
             "dovecot": "active" if dovecot_active else "inactive"
         },
+        "system_info": system_metrics,
         "environment": {
             "debug_mode": os.getenv("DEBUG", "False"),
             "domain": os.getenv("SMTP_SERVER", "localhost")
         }
     }
+
+# Підключаємо роути
+app.include_router(users.router)
+app.include_router(mail.router)
 
 @app.get("/", include_in_schema=False)
 async def root():
