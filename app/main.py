@@ -49,9 +49,13 @@ from app.services import system_service
 @app.get("/health", tags=["System"])
 async def health_check():
     """Überprüft den Status des API-Servers, der Mail-Dienste und der Server-Ressourcen."""
-    postfix_active = system_service.get_service_status("postfix")
-    dovecot_active = system_service.get_service_status("dovecot")
+    postfix_details = system_service.get_service_details("postfix")
+    dovecot_details = system_service.get_service_details("dovecot")
     system_metrics = system_service.get_system_info()
+    network_info = system_service.get_network_info()
+    
+    postfix_active = postfix_details.get("is_active", False)
+    dovecot_active = dovecot_details.get("is_active", False)
     
     status = "OK" if postfix_active and dovecot_active else "DEGRADED"
     
@@ -59,10 +63,11 @@ async def health_check():
         "status": status,
         "api_service": "running",
         "mail_services": {
-            "postfix": "active" if postfix_active else "inactive",
-            "dovecot": "active" if dovecot_active else "inactive"
+            "postfix": postfix_details,
+            "dovecot": dovecot_details
         },
         "system_info": system_metrics,
+        "network_info": network_info,
         "environment": {
             "debug_mode": os.getenv("DEBUG", "False"),
             "domain": os.getenv("SMTP_SERVER", "localhost")

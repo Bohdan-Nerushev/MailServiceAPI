@@ -56,3 +56,71 @@ def get_system_info():
         info["error"] = str(e)
         
     return info
+
+def get_service_details(service_name: str) -> dict:
+    """Sammelt detaillierte Status- und Konfigurationsinformationen für einen Dienst."""
+    details = {
+        "is_active": False,
+        "config": []
+    }
+    try:
+        active_res = subprocess.run(
+            ["systemctl", "is-active", service_name],
+            capture_output=True,
+            text=True
+        )
+        details["is_active"] = (active_res.stdout.strip() == "active")
+
+        show_res = subprocess.run(
+            ["systemctl", "show", service_name, "--no-page", "-p", "ActiveState,SubState,ActiveEnterTimestamp,MainPID"],
+            capture_output=True,
+            text=True
+        )
+        for line in show_res.stdout.splitlines():
+            if "=" in line:
+                key, val = line.split("=", 1)
+                details[key] = val
+
+        if service_name == "postfix":
+            config_res = subprocess.run(["postconf", "-n"], capture_output=True, text=True)
+            details["config"] = [line for line in config_res.stdout.splitlines() if line.strip()]
+        elif service_name == "dovecot":
+            config_res = subprocess.run(["doveconf", "-n"], capture_output=True, text=True)
+            details["config"] = [line for line in config_res.stdout.splitlines() if line.strip()]
+
+    except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Details für {service_name}: {str(e)}")
+        details["error"] = str(e)
+
+    return details
+
+def get_network_info() -> dict:
+    """Sammelt Informationen über die Netzwerkkonfiguration und Firewall."""
+    info = {}
+    try:
+        # IP Routing-Tabelle
+        route_res = subprocess.run(["ip", "route"], capture_output=True, text=True)
+        info["routing"] = route_res.stdout.splitlines()
+
+        # Netzwerkschnittstellen (Interfaces)
+        addr_res = subprocess.run(["ip", "-brief", "address"], capture_output=True, text=True)
+        info["interfaces"] = addr_res.stdout.splitlines()
+
+        # Firewall Status (UFW)
+        # Hinweis: Ohne sudo-Rechte könnte dies eingeschränkt sein
+        ufw_res = subprocess.run(["ufw", "status"], capture_output=True, text=True)
+        if ufw_res.returncode == 0:
+            info["firewall"] = ufw_res.stdout.splitlines()
+        else:
+            info["firewall"] = ["Fehlende Berechtigungen (sudo) für UFW oder UFW nicht installiert.", ufw_res.stderr.strip()]
+            
+        # Aktive Ports (Listening)
+        ss_res = subprocess.run(["ss", "-tulpn"], capture_output=True, text=True)
+        # Filtere nur die ersten 15 Zeilen, um die Antwort nicht zu groß zu machen
+        info["listening_ports"] = ss_res.stdout.splitlines()[:15]
+
+    except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Netzwerk-Infos: {str(e)}")
+        info["error"] = str(e)
+
+    return info
