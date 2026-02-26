@@ -37,9 +37,9 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8090
 
 | Сервіс | Адреса |
 | :--- | :--- |
-| **API Root** | [http://localhost:8000](http://localhost:8000) |
-| **Swagger UI (Документація)** | [http://localhost:8000/docs](http://localhost:8000/docs) |
-| **Redocly** | [http://localhost:8000/redoc](http://localhost:8000/redoc) |
+| **API Root** | [http://localhost:8090](http://localhost:8090) |
+| **Swagger UI (Документація)** | [http://localhost:8090/docs](http://localhost:8090/docs) |
+| **Redocly** | [http://localhost:8090/redoc](http://localhost:8090/redoc) |
 
 ---
 

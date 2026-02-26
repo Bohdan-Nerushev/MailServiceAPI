@@ -53,17 +53,17 @@ if __name__ == "__main__":
     # 1. Send a message
     print("--- Sending Message ---")
     send_message(
-        to_email="bnerushev@lehrwerkstatt",
-        subject="Test from Python Script",
-        body="This is a test body sent from the Python client script.",
-        from_email="testuser@lehrwerkstatt"
+        to_email="vosadchuk@vo.lehrwerkstatt",
+        subject="Test from Python Scriptggggggggg",
+        body="This is a test body sent from the Python client scrihhhhhpt.",
+        from_email="bnerushev@bnerushev.lehrwerkstatt"
     )
     
     print("\n" + "="*30 + "\n")
     
     # 2. Get all messages
     print("--- Getting Inbox ---")
-    get_all_messages(
-        username="testuser",
-        password="SicheresPasswort123!"  # Replace with actual password
-    )
+  #  get_all_messages(
+  #      username="bnerushev",
+  #     password="SicheresPasswort123!"  # Replace with actual password
+  #  )

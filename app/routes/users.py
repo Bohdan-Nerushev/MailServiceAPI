@@ -1,17 +1,23 @@
 from fastapi import APIRouter, HTTPException, Header
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services import user_manager
 
 router = APIRouter(prefix="/users", tags=["Benutzer"])
 
-from pydantic import Field
-
 class UserCreate(BaseModel):
     username: str = Field(..., examples=["testuser"])
-    password: str = Field(..., examples=["SicheresPasswort123!"])
+    password: str = Field(
+        ...,
+        examples=["SicheresPasswort123!"],
+        json_schema_extra={"format": "password"}
+    )
 
 class UserPasswordChange(BaseModel):
-    password: str = Field(..., examples=["NeuesPasswort456!"])
+    password: str = Field(
+        ...,
+        examples=["NeuesPasswort456!"],
+        json_schema_extra={"format": "password"}
+    )
 
 @router.get("/")
 async def list_users():
@@ -30,7 +36,14 @@ async def create_user(user: UserCreate):
     return {"message": f"Benutzer {user.username} wurde angelegt"}
 
 @router.delete("/{username}")
-async def delete_user(username: str, x_admin_password: str = Header(..., description="Admin-Passwort aus der .env-Datei")):
+async def delete_user(
+    username: str,
+    x_admin_password: str = Header(
+        ...,
+        description="Admin-Passwort aus der .env-Datei",
+        json_schema_extra={"format": "password"}
+    )
+):
     """Einen Benutzer und sein Postfach löschen."""
     import os
     if x_admin_password != os.getenv("SMTP_PASSWORD"):

@@ -1,15 +1,14 @@
 from fastapi import APIRouter, HTTPException, Header
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from app.services import smtp_service, imap_service
-from pydantic import Field
 
 router = APIRouter(prefix="/mail", tags=["E-Mail"])
 
 class EmailSchema(BaseModel):
-    to: str = Field(..., examples=["admin@lehrwerkstatt"])
+    to: str = Field(..., examples=["vosadchuk@vo.lehrwerkstatt"])
     subject: str = Field(..., examples=["Test-E-Mail"])
     body: str = Field(..., examples=["Dies ist eine Test-Nachricht vom Mail-Service."])
-    from_email: str = Field(None, examples=["testuser@lehrwerkstatt"])
+    from_email: str = Field(None, examples=["bnerushev@bnerushev.lehrwerkstatt"])
 
 @router.post("/send")
 async def send_mail(email_data: EmailSchema):
@@ -27,7 +26,14 @@ async def send_mail(email_data: EmailSchema):
     return {"message": "E-Mail erfolgreich versendet"}
 
 @router.get("/inbox/{username}")
-async def get_inbox(username: str, x_password: str = Header(..., description="Passwort des E-Mail-Kontos")):
+async def get_inbox(
+    username: str,
+    x_password: str = Header(
+        ...,
+        description="Passwort des E-Mail-Kontos",
+        json_schema_extra={"format": "password"}
+    )
+):
     """Liste der neuesten E-Mails im Posteingang abrufen."""
     success, result = imap_service.fetch_inbox(username, x_password)
     if not success:
@@ -35,7 +41,15 @@ async def get_inbox(username: str, x_password: str = Header(..., description="Pa
     return {"inbox": result}
 
 @router.get("/message/{uid}")
-async def get_message(uid: str, username: str, x_password: str = Header(..., description="Passwort des E-Mail-Kontos")):
+async def get_message(
+    uid: str,
+    username: str,
+    x_password: str = Header(
+        ...,
+        description="Passwort des E-Mail-Kontos",
+        json_schema_extra={"format": "password"}
+    )
+):
     """Vollständigen Inhalt einer Nachricht anhand ihrer UID abrufen."""
     success, result = imap_service.fetch_message_by_uid(username, x_password, uid)
     if not success:
@@ -43,7 +57,15 @@ async def get_message(uid: str, username: str, x_password: str = Header(..., des
     return {"message": result}
 
 @router.delete("/message/{uid}")
-async def delete_message(uid: str, username: str, x_password: str = Header(..., description="Passwort des E-Mail-Kontos")):
+async def delete_message(
+    uid: str,
+    username: str,
+    x_password: str = Header(
+        ...,
+        description="Passwort des E-Mail-Kontos",
+        json_schema_extra={"format": "password"}
+    )
+):
     """Eine E-Mail anhand ihrer UID dauerhaft löschen."""
     success, result = imap_service.delete_message_by_uid(username, x_password, uid)
     if not success:
