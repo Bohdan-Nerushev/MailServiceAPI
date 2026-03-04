@@ -95,12 +95,30 @@ async def view_mail_page(request: Request, uid: str):
 # --- POST Routes (Actions) ---
 
 @router.post("/register")
-async def handle_register(username: str = Form(...), password: str = Form(...)):
+async def handle_register(
+    request: Request,
+    username: str = Form(...), 
+    password: str = Form(...),
+    confirm_password: str = Form(...)
+):
+    # 1. Check if passwords match
+    if password != confirm_password:
+        return templates.TemplateResponse("register.html", {
+            "request": request, 
+            "error": "Паролі не збігаються",
+            "user": username
+        })
+
+    # 2. Proceed with creation
     success, msg = user_manager.create_system_user(username, password)
     if success:
-        return RedirectResponse(url="/ui/users", status_code=status.HTTP_303_SEE_OTHER)
-    # TODO: Error handling with template feedback
-    return RedirectResponse(url="/ui/register?error=" + str(msg), status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/ui/users?msg=User+created", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse("register.html", {
+        "request": request, 
+        "error": f"Помилка створення: {msg}",
+        "user": username
+    })
 
 @router.post("/login")
 async def handle_login(username: str = Form(...), password: str = Form(...)):
@@ -122,6 +140,7 @@ async def handle_logout():
 
 @router.post("/change-password")
 async def handle_change_password(
+    request: Request,
     username: str = Form(...), 
     current_password: str = Form(...),
     new_password: str = Form(...),
@@ -129,27 +148,34 @@ async def handle_change_password(
 ):
     # 1. Check if new passwords match
     if new_password != confirm_password:
-        return RedirectResponse(
-            url=f"/ui/change-password?error=Нові+паролі+не+збігаються&user={username}", 
-            status_code=status.HTTP_303_SEE_OTHER
-        )
+        return templates.TemplateResponse("change_password.html", {
+            "request": request, 
+            "error": "Нові паролі не збігаються",
+            "user": username
+        })
 
     # 2. Verify current password
     if not user_manager.verify_user_password(username, current_password):
-        return RedirectResponse(
-            url=f"/ui/change-password?error=Невірний+поточний+пароль&user={username}", 
-            status_code=status.HTTP_303_SEE_OTHER
-        )
+        return templates.TemplateResponse("change_password.html", {
+            "request": request, 
+            "error": "Невірний поточний пароль",
+            "user": username
+        })
 
     # 3. Perform the change
     success, msg = user_manager.change_user_password(username, new_password)
     if success:
-        return RedirectResponse(url="/ui/users?msg=Password+updated", status_code=status.HTTP_303_SEE_OTHER)
+        return templates.TemplateResponse("change_password.html", {
+            "request": request, 
+            "success_msg": "Пароль успішно оновлено! Повернення до списку...",
+            "user": username
+        })
     
-    return RedirectResponse(
-        url=f"/ui/change-password?error={msg}&user={username}", 
-        status_code=status.HTTP_303_SEE_OTHER
-    )
+    return templates.TemplateResponse("change_password.html", {
+        "request": request, 
+        "error": f"Помилка оновлення: {msg}",
+        "user": username
+    })
 
 @router.post("/delete-user")
 async def handle_delete_user(username: str = Form(...)):

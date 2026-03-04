@@ -5,7 +5,7 @@
 {% block content %}
 <div class="max-w-md mx-auto">
     <div class="mb-8 flex items-center text-rose-600">
-        <a href="/" class="text-slate-400 hover:text-rose-600 transition-colors mr-4 group">
+        <a href="/ui/users" class="text-slate-400 hover:text-rose-600 transition-colors mr-4 group">
             <svg class="w-6 h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
@@ -38,9 +38,26 @@
             <div>
                 <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Підтвердіть вашим
                     паролем</label>
-                <input type="password" name="password" id="password" required
-                    class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none"
-                    placeholder="••••••••">
+                <div class="relative">
+                    <input type="password" name="password" id="password" required
+                        class="block w-full px-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none"
+                        placeholder="••••••••">
+                    <button type="button" onclick="togglePassword('password', this)"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-rose-600">
+                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                            </path>
+                        </svg>
+                        <svg class="w-5 h-5 eye-off-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.046m4.596-4.596A10.064 10.064 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.059 10.059 0 01-4.115 5.196m-5.427-1.112A3 3 0 1111.036 10.97M3 3l18 18">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <button type="submit"
