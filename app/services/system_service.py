@@ -161,3 +161,50 @@ def get_network_info() -> dict:
         info["error"] = str(e)
 
     return info
+
+
+def get_mail_security_status() -> dict:
+    """Sammelt Informationen über SpamAssassin, Procmail und die Postfix-Integration."""
+    status = {
+        "spamassassin": {
+            "service": "unknown",
+            "is_active": False,
+            "spamd_version": "unknown"
+        },
+        "procmail": {
+            "installed": False,
+            "global_config_exists": False
+        },
+        "postfix_integration": {
+            "content_filter_enabled": False,
+            "filter_service_defined": False
+        }
+    }
+
+    try:
+        # SpamAssassin Service Status
+        spamd_res = subprocess.run(["systemctl", "is-active", "spamd"], capture_output=True, text=True)
+        status["spamassassin"]["service"] = spamd_res.stdout.strip()
+        status["spamassassin"]["is_active"] = (status["spamassassin"]["service"] == "active")
+
+        # SpamAssassin Version
+        version_res = subprocess.run(["spamassassin", "-V"], capture_output=True, text=True)
+        if version_res.returncode == 0:
+            status["spamassassin"]["spamd_version"] = version_res.stdout.splitlines()[0]
+
+        # Procmail Status
+        status["procmail"]["installed"] = os.path.exists("/usr/bin/procmail")
+        status["procmail"]["global_config_exists"] = os.path.exists("/etc/procmailrc")
+
+        # Postfix Integration Check
+        master_cf_res = run_sudo_command(["grep", "-E", "content_filter=spamassassin", "/etc/postfix/master.cf"])
+        status["postfix_integration"]["content_filter_enabled"] = (master_cf_res.returncode == 0)
+
+        master_cf_service_res = run_sudo_command(["grep", "^spamassassin", "/etc/postfix/master.cf"])
+        status["postfix_integration"]["filter_service_defined"] = (master_cf_service_res.returncode == 0)
+
+    except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Mail-Security-Infos: {str(e)}")
+        status["error"] = str(e)
+
+    return status

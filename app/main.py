@@ -54,18 +54,23 @@ async def health_check():
     system_metrics = system_service.get_system_info()
     network_info = system_service.get_network_info()
     
+    mail_security = system_service.get_mail_security_status()
+    
     postfix_active = postfix_details.get("is_active", False)
     dovecot_active = dovecot_details.get("is_active", False)
+    spamd_active = mail_security.get("spamassassin", {}).get("is_active", False)
     
-    status = "OK" if postfix_active and dovecot_active else "DEGRADED"
+    status = "OK" if postfix_active and dovecot_active and spamd_active else "DEGRADED"
     
     return {
         "status": status,
         "api_service": "running",
         "mail_services": {
             "postfix": postfix_details,
-            "dovecot": dovecot_details
+            "dovecot": dovecot_details,
+            "spamd": mail_security.get("spamassassin")
         },
+        "mail_security": mail_security,
         "system_info": system_metrics,
         "network_info": network_info,
         "environment": {
