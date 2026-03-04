@@ -35,12 +35,22 @@ async def create_user(user: UserCreate):
         raise HTTPException(status_code=400, detail=f"Benutzer konnte nicht erstellt werden: {message}")
     return {"message": f"Benutzer {user.username} wurde angelegt"}
 
+@router.put("/{username}/password")
+async def change_password(username: str, data: UserPasswordChange):
+    """Das Passwort eines bestehenden Benutzers ändern."""
+    success, message = user_manager.change_user_password(username, data.password)
+    if not success:
+        raise HTTPException(status_code=400, detail=f"Passwort konnte nicht geändert werden: {message}")
+    return {"message": f"Passwort für {username} wurde geändert"}
+
+
+
 @router.delete("/{username}")
 async def delete_user(
     username: str,
     x_admin_password: str = Header(
         ...,
-        description="Admin-Passwort aus der .env-Datei",
+        description="Passwort ",
         json_schema_extra={"format": "password"}
     )
 ):
@@ -54,10 +64,3 @@ async def delete_user(
         raise HTTPException(status_code=400, detail=f"Benutzer konnte nicht gelöscht werden: {message}")
     return {"message": f"Benutzer {username} wurde gelöscht"}
 
-@router.put("/{username}/password")
-async def change_password(username: str, data: UserPasswordChange):
-    """Das Passwort eines bestehenden Benutzers ändern."""
-    success, message = user_manager.change_user_password(username, data.password)
-    if not success:
-        raise HTTPException(status_code=400, detail=f"Passwort konnte nicht geändert werden: {message}")
-    return {"message": f"Passwort für {username} wurde geändert"}

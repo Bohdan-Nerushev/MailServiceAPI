@@ -1,13 +1,15 @@
 import os
 import logging
+from pprint import pprint
+
 from imap_tools import MailBox, AND
 
 logger = logging.getLogger(__name__)
 
-def fetch_inbox(username, password, limit=10):
+def fetch_inbox(username, password, limit=1000):
     """Отримує список останніх листів з папки INBOX."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
-    
+
     try:
         # Підключаємося до сервера
         with MailBox(imap_server).login(username, password, 'INBOX') as mailbox:
@@ -22,10 +24,12 @@ def fetch_inbox(username, password, limit=10):
                     "text": msg.text,
                     "seen": msg.flags
                 })
+
             return True, messages
     except Exception as e:
         logger.error(f"Помилка IMAP (fetch): {str(e)}")
         return False, str(e)
+
 
 def fetch_message_by_uid(username, password, uid):
     """Отримує повний текст конкретного листа за його UID."""
