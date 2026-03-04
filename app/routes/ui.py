@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.services import user_manager, imap_service, system_service, smtp_service
+from datetime import datetime
 import os
 import logging
 
@@ -9,6 +10,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ui", tags=["UI"])
 templates = Jinja2Templates(directory="app/templates")
+
+# Add global helpers to templates
+templates.env.globals.update({
+    "now": datetime.now,
+    "os": os
+})
 
 # --- Helpers ---
 
@@ -41,24 +48,42 @@ async def users_list_page(request: Request):
 
 @router.get("/health", response_class=HTMLResponse)
 async def health_page(request: Request):
+    """Render system health dashboard with structured details."""
+    import sys
+    import platform
+    
     health_data = {
+        "status": "OK",
+        "api_service": "running",
         "mail_services": {
             "postfix": system_service.get_service_details("postfix"),
             "dovecot": system_service.get_service_details("dovecot"),
+            "spamd": system_service.get_service_details("spamd"),
         },
+        "mail_security": system_service.get_mail_security_status(),
         "system_info": system_service.get_system_info(),
         "network_info": system_service.get_network_info(),
-        "mail_security": system_service.get_mail_security_status()
+        "server_configuration": {
+            "debug_mode": str(os.getenv("DEBUG", "True")),
+            "domain": os.getenv("DOMAIN", "127.0.0.1"),
+            "python_version": sys.version.split()[0],
+            "os_platform": platform.platform(),
+            "working_dir": os.getcwd()
+        }
     }
     return templates.TemplateResponse("health.html", {"request": request, "health": health_data})
 
 @router.get("/change-password", response_class=HTMLResponse)
 async def change_password_page(request: Request):
-    return templates.TemplateResponse("change_password.html", {"request": request})
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+    return templates.TemplateResponse("change_password.html", {"request": request, "users": usernames})
 
 @router.get("/delete-user", response_class=HTMLResponse)
 async def delete_user_page(request: Request):
-    return templates.TemplateResponse("delete_user.html", {"request": request})
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+    return templates.TemplateResponse("delete_user.html", {"request": request, "users": usernames})
 
 @router.get("/inbox", response_class=HTMLResponse)
 async def inbox_page(request: Request, error: str = None):
@@ -146,12 +171,17 @@ async def handle_change_password(
     new_password: str = Form(...),
     confirm_password: str = Form(...)
 ):
+    # Fetch users for re-rendering the form in case of error
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+
     # 1. Check if new passwords match
     if new_password != confirm_password:
         return templates.TemplateResponse("change_password.html", {
             "request": request, 
             "error": "Нові паролі не збігаються",
-            "user": username
+            "user": username,
+            "users": usernames
         })
 
     # 2. Verify current password
@@ -159,7 +189,8 @@ async def handle_change_password(
         return templates.TemplateResponse("change_password.html", {
             "request": request, 
             "error": "Невірний поточний пароль",
-            "user": username
+            "user": username,
+            "users": usernames
         })
 
     # 3. Perform the change
@@ -168,21 +199,46 @@ async def handle_change_password(
         return templates.TemplateResponse("change_password.html", {
             "request": request, 
             "success_msg": "Пароль успішно оновлено! Повернення до списку...",
-            "user": username
+            "user": username,
+            "users": usernames
         })
     
     return templates.TemplateResponse("change_password.html", {
         "request": request, 
         "error": f"Помилка оновлення: {msg}",
-        "user": username
+        "user": username,
+        "users": usernames
     })
 
 @router.post("/delete-user")
-async def handle_delete_user(username: str = Form(...)):
+async def handle_delete_user(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    # Fetch users for re-rendering if error
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+
+    # Verify password before deletion
+    if not user_manager.verify_user_password(username, password):
+        return templates.TemplateResponse("delete_user.html", {
+            "request": request, 
+            "error": "Невірний пароль для підтвердження видалення",
+            "users": usernames,
+            "user": username
+        })
+
     success, msg = user_manager.delete_system_user(username)
     if success:
-        return RedirectResponse(url="/ui/users", status_code=status.HTTP_303_SEE_OTHER)
-    return RedirectResponse(url="/ui/delete-user?error=" + str(msg), status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/ui/users?msg=User+deleted", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse("delete_user.html", {
+        "request": request, 
+        "error": f"Помилка видалення: {msg}",
+        "users": usernames,
+        "user": username
+    })
 
 @router.post("/compose")
 async def handle_send_mail(request: Request, to: str = Form(...), subject: str = Form(...), body: str = Form(...)):

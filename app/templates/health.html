@@ -3,146 +3,376 @@
 {% block title %}Стан системи - Mail Service API{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-10">
+<div id="health-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ 
+        detailView: null,
+        services: {}
+    }" x-init="services = JSON.parse(document.getElementById('health-data-raw').textContent)">
+
+    <!-- Raw Data for Alpine -->
+    <script id="health-data-raw" type="application/json">
+        {{ health|tojson|safe }}
+    </script>
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 space-y-4 md:space-y-0">
         <div>
-            <h1 class="text-3xl font-bold font-outfit text-slate-900">Моніторинг сервісів</h1>
-            <p class="text-slate-500">Реальний стан поштового серверу та ресурсів</p>
+            <h1 class="text-4xl font-bold font-outfit text-slate-900 tracking-tight">Моніторинг сервісів</h1>
+            <div class="flex items-center mt-2 space-x-3">
+                <span class="flex h-3 w-3 relative">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <p class="text-slate-500 font-medium">Дані актуальні на {{ now().strftime('%H:%M:%S') }}</p>
+            </div>
         </div>
-        <button hx-get="/ui/health" hx-target="#health-grid" hx-select="#health-grid" hx-swap="outerHTML"
-            class="p-3 bg-slate-900 text-white rounded-xl hover:rotate-180 transition-all duration-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button hx-get="/ui/health" hx-target="#health-container" hx-select="#health-container" hx-swap="outerHTML"
+            class="group p-3 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-brand-600 hover:text-brand-600 transition-all duration-300 shadow-sm flex items-center space-x-2">
+            <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-700" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                 </path>
             </svg>
+            <span class="font-bold pr-2">Оновити</span>
         </button>
     </div>
 
-    <!-- Health Dashboard -->
-    <div id="health-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
-        <!-- Postfix Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
-            <div
-                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_services.postfix.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76">
-                    </path>
+    <!-- Top Grid: Status Dashboard -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
+        <!-- API Status Card -->
+        <div @click="detailView = 'api'"
+            class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-brand-600/10 hover:border-brand-600/50 transition-all cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">ACTIVE</span>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">API Сервіс</h3>
+            <p class="text-slate-500 text-sm mt-1">Uvicorn FastAPI Engine</p>
+            <div class="mt-4 flex items-center text-xs font-bold text-brand-600">
+                Детальніше
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </div>
-            <h3 class="font-bold text-slate-800">Postfix</h3>
-            <span
-                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_services.postfix.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
-                {% if health.mail_services.postfix.is_active %}Активний{% else %}Зупинено{% endif %}
-            </span>
-            <p class="text-xs text-slate-400 mt-4">{{ health.mail_services.postfix.MainPID or 'PID невідомий' }}
-            </p>
+        </div>
+
+        <!-- Postfix Card -->
+        <div @click="detailView = 'postfix'"
+            class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-brand-600/10 hover:border-brand-600/50 transition-all cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="p-3 bg-amber-50 text-amber-600 rounded-2xl group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                {% if health.mail_services.postfix.is_active %}
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">LIVE</span>
+                {% else %}
+                <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full">FAIL</span>
+                {% endif %}
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Postfix MTA</h3>
+            <p class="text-slate-500 text-sm mt-1">SMTP Protocol Service</p>
+            <div class="mt-4 flex items-center text-xs font-bold text-brand-600">
+                Конфігурація
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
         </div>
 
         <!-- Dovecot Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
-            <div
-                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_services.dovecot.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                    </path>
+        <div @click="detailView = 'dovecot'"
+            class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-brand-600/10 hover:border-brand-600/50 transition-all cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="p-3 bg-brand-50 text-brand-600 rounded-2xl group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
+                    </svg>
+                </div>
+                {% if health.mail_services.dovecot.is_active %}
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">LIVE</span>
+                {% else %}
+                <span class="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-full">FAIL</span>
+                {% endif %}
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Dovecot MDA</h3>
+            <p class="text-slate-500 text-sm mt-1">IMAP/POP3 Protocol</p>
+            <div class="mt-4 flex items-center text-xs font-bold text-brand-600">
+                Стан акаунтів
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </div>
-            <h3 class="font-bold text-slate-800">Dovecot</h3>
-            <span
-                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_services.dovecot.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
-                {% if health.mail_services.dovecot.is_active %}Активний{% else %}Зупинено{% endif %}
-            </span>
-            <p class="text-xs text-slate-400 mt-4">{{ health.mail_services.dovecot.MainPID or 'PID невідомий' }}
-            </p>
         </div>
 
-        <!-- SpamAssassin Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
-            <div
-                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_security.spamassassin.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                    </path>
+        <!-- System Load Card -->
+        <div @click="detailView = 'resources'"
+            class="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-brand-600/10 hover:border-brand-600/50 transition-all cursor-pointer group">
+            <div class="flex items-center justify-between mb-4">
+                <div
+                    class="p-3 bg-slate-50 text-slate-600 rounded-2xl group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 00-2 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                </div>
+                <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-bold rounded-full">{{
+                    health.system_info.cpu.percent }}% LOAD</span>
+            </div>
+            <h3 class="font-bold text-slate-800 text-lg">Система</h3>
+            <p class="text-slate-500 text-sm mt-1">{{ health.system_info.uptime }}</p>
+            <div class="mt-4 flex items-center text-xs font-bold text-brand-600">
+                Завантаження ОС
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </div>
-            <h3 class="font-bold text-slate-800">Anti-Spam</h3>
-            <span
-                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_security.spamassassin.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
-                {% if health.mail_security.spamassassin.is_active %}Активний{% else %}Зупинено{% endif %}
-            </span>
-            <p class="text-xs text-slate-400 mt-4">Security Score: High</p>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 animate-fade-in">
+        <!-- Left: Network & Security -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Networking Section -->
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                    <h4 class="font-bold text-slate-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9">
+                            </path>
+                        </svg>
+                        Мережеві інтерфейси
+                    </h4>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="px-8 py-4 font-semibold">Назва</th>
+                                <th class="px-8 py-4 font-semibold">IP Адреса</th>
+                                <th class="px-8 py-4 font-semibold">Маска</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            {% for iface in health.network_info.interfaces %}
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-8 py-4 font-bold text-slate-700">{{ iface.name }}</td>
+                                <td class="px-8 py-4 font-mono text-slate-500">
+                                    {% for addr in iface.addresses %}
+                                    {% if 'AF_INET6' not in addr.family and addr.addr %}
+                                    <div class="mb-1">{{ addr.addr }}</div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td class="px-8 py-4 text-slate-400 font-mono text-xs">
+                                    {% for addr in iface.addresses %}
+                                    {% if 'AF_INET6' not in addr.family and addr.netmask %}
+                                    <div class="mb-1">{{ addr.netmask }}</div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Firewall & Ports -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8">
+                    <h4 class="font-bold text-slate-800 mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                        Берандмауер (UFW)
+                    </h4>
+                    <div
+                        class="bg-slate-900 rounded-2xl p-4 font-mono text-xs text-emerald-400 overflow-y-auto h-48 custom-scrollbar">
+                        {% for line in health.network_info.firewall %}
+                        <div class="mb-0.5">{{ line }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8">
+                    <h4 class="font-bold text-slate-800 mb-6 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                        Активні порти
+                    </h4>
+                    <div
+                        class="bg-slate-900 rounded-2xl p-4 font-mono text-xs text-sky-400 overflow-y-auto h-48 custom-scrollbar">
+                        {% for line in health.network_info.listening_ports %}
+                        <div class="mb-0.5 truncate">{{ line }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- CPU/Mem Card -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
-            <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center mb-4">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                    </path>
-                </svg>
+        <!-- Right: OS Info & Server Configuration -->
+        <div class="space-y-8">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8">
+                <h4
+                    class="font-bold text-slate-800 mb-6 underline decoration-brand-600 decoration-4 underline-offset-8">
+                    Параметри ОС</h4>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                        <span class="text-slate-500 text-sm font-medium">Версія ядра</span>
+                        <span class="text-slate-800 font-bold text-sm">{{ health.system_info.os }}</span>
+                    </div>
+                    {% for line in health.system_info.hostnamectl %}
+                    {% if 'Operating System' in line or 'Kernel' in line or 'Architecture' in line %}
+                    <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                        <span class="text-slate-400 text-xs font-medium">{{ line.split(':')[0] }}</span>
+                        <span class="text-slate-700 font-bold text-xs text-right ml-2">{{ line.split(':')[1] }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    <div class="py-2">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-slate-500 text-sm font-medium">Оперативна пам'ять</span>
+                            <span class="text-indigo-600 font-bold text-sm">{{ health.system_info.memory.used }} / {{
+                                health.system_info.memory.total }}</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-600 rounded-full transition-all duration-1000"
+                                style="width: {{ health.system_info.memory.percent }}%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h3 class="font-bold text-slate-800">Ресурси</h3>
-            <div class="w-full mt-4 space-y-2">
-                <div class="flex justify-between text-xs">
-                    <span class="text-slate-500">CPU</span>
-                    <span class="font-bold">{{ health.system_info.cpu.percent }}%</span>
-                </div>
-                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-brand-600" style="width: {{ health.system_info.cpu.percent }}%"></div>
-                </div>
-                <div class="flex justify-between text-xs pt-2">
-                    <span class="text-slate-500">RAM</span>
-                    <span class="font-bold">{{ health.system_info.memory.percent }}%</span>
-                </div>
-                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-indigo-600" style="width: {{ health.system_info.memory.percent }}%"></div>
+
+            <div class="bg-slate-900 rounded-3xl shadow-xl shadow-slate-900/20 p-8 text-white">
+                <h4 class="font-bold text-white mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+                        </path>
+                    </svg>
+                    Конфігурація сервера
+                </h4>
+                <div class="space-y-4">
+                    {% for key, val in health.server_configuration.items() %}
+                    <div class="flex flex-col space-y-1">
+                        <span class="text-slate-400 text-xs uppercase tracking-widest font-bold">{{ key.replace('_', '
+                            ') }}</span>
+                        <span class="text-indigo-300 font-mono text-sm break-all">{{ val }}</span>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Details Table -->
-    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
-            <h4 class="font-bold text-slate-800">Мережева інформація</h4>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
-                    <tr>
-                        <th class="px-6 py-3 font-semibold">Інтерфейс</th>
-                        <th class="px-6 py-3 font-semibold">IP Адреса</th>
-                        <th class="px-6 py-3 font-semibold">Маска</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-sm">
-                    {% for iface in health.network_info.interfaces %}
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-medium text-slate-700">{{ iface.name }}</td>
-                        <td class="px-6 py-4 font-mono text-slate-500">
-                            {% for addr in iface.addresses %}
-                            {% if 'AF_INET' in addr.family and not 'AF_INET6' in addr.family %}
-                            <div class="py-0.5">{{ addr.addr }}</div>
-                            {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td class="px-6 py-4 text-slate-400">
-                            {% for addr in iface.addresses %}
-                            {% if 'AF_INET' in addr.family and not 'AF_INET6' in addr.family %}
-                            <div class="py-0.5">{{ addr.netmask or 'N/A' }}</div>
-                            {% endif %}
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Modals -->
+    <div x-show="detailView" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-12" x-cloak>
+        <!-- Backdrop -->
+        <div @click="detailView = null" x-show="detailView" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+        <!-- Modal Body -->
+        <div class="bg-white w-full max-w-4xl h-full max-h-[85vh] rounded-3xl shadow-2xl relative z-10 flex flex-col overflow-hidden"
+            x-show="detailView" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0">
+
+            <!-- Modal Header -->
+            <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 font-outfit"
+                        x-text="detailView === 'postfix' ? 'Конфігурація Postfix' : (detailView === 'dovecot' ? 'Конфігурація Dovecot' : (detailView === 'api' ? 'Параметри API' : 'Ресурси Системи'))">
+                    </h2>
+                </div>
+                <button @click="detailView = null" class="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                    <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-8 overflow-y-auto custom-scrollbar flex-grow bg-slate-50/30">
+                <div x-show="detailView === 'postfix' || detailView === 'dovecot'">
+                    <div class="bg-slate-900 rounded-3xl p-6 font-mono text-xs text-brand-100 overflow-x-auto">
+                        <template x-for="item in (detailView ? services.mail_services[detailView].config : [])">
+                            <div class="py-1 border-b border-slate-800 last:border-0 px-2 rounded -mx-2">
+                                <span class="text-slate-300 break-all" x-text="item"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div x-show="detailView === 'api'">
+                    <div class="p-6 bg-brand-600 rounded-3xl text-white shadow-lg shadow-brand-600/30">
+                        <h3 class="text-xl font-bold mb-2">FastAPI Backend Status</h3>
+                        <p class="text-brand-100 text-sm italic">Worker PID: {{ os.getpid() }}</p>
+                        <p class="text-white mt-4 font-bold">Python: {{ health.server_configuration.python_version }}
+                        </p>
+                    </div>
+                </div>
+
+                <div x-show="detailView === 'resources'">
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl border border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">hostnamectl output</h4>
+                            <div class="bg-slate-50 p-4 rounded-xl font-mono text-xs text-slate-600 text-left">
+                                {% for line in health.system_info.hostnamectl %}
+                                <div>{{ line }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-8 py-6 border-t border-slate-100 flex justify-end bg-slate-50">
+                <button @click="detailView = null"
+                    class="px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95">Закрити</button>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+    }
+</style>
 {% endblock %}

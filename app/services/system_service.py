@@ -56,6 +56,14 @@ def get_service_status(service_name: str) -> bool:
 
 import psutil
 
+def get_hostnamectl() -> list:
+    """Returns detailed information from hostnamectl command."""
+    try:
+        res = subprocess.run(["hostnamectl"], capture_output=True, text=True)
+        return [line.strip() for line in res.stdout.splitlines() if line.strip()]
+    except Exception:
+        return ["hostnamectl not available"]
+
 def get_system_info():
     """Sammelt detaillierte Informationen über die Maschine."""
     info = {}
@@ -63,6 +71,7 @@ def get_system_info():
         # OS Info
         info["os"] = subprocess.getoutput("uname -sr")
         info["hostname"] = subprocess.getoutput("hostname")
+        info["hostnamectl"] = get_hostnamectl()
         
         # Uptime
         info["uptime"] = subprocess.getoutput("uptime -p")

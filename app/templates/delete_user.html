@@ -27,12 +27,28 @@
 
         <form action="/ui/delete-user" method="POST" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Користувач для
+                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Оберіть акаунт для
                     видалення</label>
-                <input type="text" name="username" id="username" required
-                    value="{{ request.query_params.get('user', '') }}"
-                    class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none"
-                    placeholder="username">
+                <div class="relative group">
+                    <select name="username" id="username" required
+                        class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none appearance-none cursor-pointer text-slate-700 font-medium group-hover:bg-white group-hover:border-slate-300">
+                        <option value="" disabled {% if not user and not request.query_params.get('user') %}selected{%
+                            endif %}>Оберіть користувача...</option>
+                        {% for u in users %}
+                        <option value="{{ u }}" {% if u==user or u==request.query_params.get('user') %}selected{% endif
+                            %}>
+                            {{ u }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div
+                        class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-hover:text-rose-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4 4 4-4">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
             </div>
 
             <div>
