@@ -1,7 +1,44 @@
+import os
 import subprocess
 import logging
 
 logger = logging.getLogger(__name__)
+
+import tempfile
+import stat
+
+def run_sudo_command(command: list, input_data: str = None) -> subprocess.CompletedProcess:
+    """Executes a command with sudo -A using a temporary askpass script."""
+    sudo_password = os.getenv("SUDO_USER_PASSWORD", "")
+    
+    if not sudo_password:
+        logger.warning("SUDO_USER_PASSWORD not found in environment. Trying sudo -n.")
+        return subprocess.run(
+            ["sudo", "-n"] + command,
+            input=input_data,
+            capture_output=True,
+            text=True
+        )
+
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as f:
+        f.write(f"#!/bin/sh\necho '{sudo_password}'\n")
+        askpass_path = f.name
+    
+    try:
+        os.chmod(askpass_path, os.stat(askpass_path).st_mode | stat.S_IEXEC)
+        env = os.environ.copy()
+        env['SUDO_ASKPASS'] = askpass_path
+        
+        return subprocess.run(
+            ["sudo", "-A"] + command,
+            input=input_data,
+            capture_output=True,
+            text=True,
+            env=env
+        )
+    finally:
+        if os.path.exists(askpass_path):
+            os.remove(askpass_path)
 
 def get_service_status(service_name: str) -> bool:
     """Überprüft, ob ein Systemd-Dienst aktiv ist."""
@@ -108,7 +145,7 @@ def get_network_info() -> dict:
 
         # Firewall Status (UFW)
         # Hinweis: Ohne sudo-Rechte könnte dies eingeschränkt sein
-        ufw_res = subprocess.run(["ufw", "status"], capture_output=True, text=True)
+        ufw_res = run_sudo_command(["ufw", "status"])
         if ufw_res.returncode == 0:
             info["firewall"] = ufw_res.stdout.splitlines()
         else:

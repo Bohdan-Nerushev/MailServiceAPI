@@ -1,22 +1,59 @@
+import os
 import subprocess
 import logging
+import tempfile
+import stat
+import crypt
 
 # Einstellen Logging 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def _run_sudo_with_askpass(command: list, input_data: str = None, check: bool = True):
+    """Executes a command with sudo -A using a temporary askpass script."""
+    sudo_password = os.getenv("SUDO_USER_PASSWORD", "")
+    
+    if not sudo_password:
+        logger.warning("SUDO_USER_PASSWORD not found in environment. Trying sudo -n.")
+        return subprocess.run(
+            ["sudo", "-n"] + command,
+            input=input_data,
+            capture_output=True,
+            text=True,
+            check=check
+        )
+
+    # Create a temporary script for SUDO_ASKPASS
+    # We use a context manager to ensure cleanup
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.sh', delete=False) as f:
+        # Use single quotes for the password to avoid shell expansion issues
+        f.write(f"#!/bin/sh\necho '{sudo_password}'\n")
+        askpass_path = f.name
+    
+    try:
+        # Make the script executable
+        os.chmod(askpass_path, os.stat(askpass_path).st_mode | stat.S_IEXEC)
+        
+        env = os.environ.copy()
+        env['SUDO_ASKPASS'] = askpass_path
+        
+        return subprocess.run(
+            ["sudo", "-A"] + command,
+            input=input_data,
+            capture_output=True,
+            text=True,
+            check=check,
+            env=env
+        )
+    finally:
+        if os.path.exists(askpass_path):
+            os.remove(askpass_path)
+
 def run_command(command: list):
     """Helper function to execute system commands via sudo."""
     try:
-        # Add sudo to each command
-        full_command = ["sudo"] + command
-        result = subprocess.run(
-            full_command, 
-            capture_output=True, 
-            text=True, 
-            check=True
-        )
-        logger.info(f"Команда виконана успішно: {' '.join(full_command)}")
+        result = _run_sudo_with_askpass(command)
+        logger.info(f"Команда виконана успішно: sudo {' '.join(command)}")
         return True, result.stdout
     except subprocess.CalledProcessError as e:
         logger.error(f"Помилка виконання команди {' '.join(e.cmd)}: {e.stderr}")
@@ -42,16 +79,11 @@ def change_user_password(username: str, password: str):
     """Change the password of an existing user."""
     try:
         # For chpasswd we pass "user:pass" to stdin
-        full_command = ["sudo", "chpasswd"]
-        input_data = f"{username}:{password}"
+        # Now using ASKPASS, stdin is free for chpasswd
+        input_data = f"{username}:{password}\n"
         
-        result = subprocess.run(
-            full_command,
-            input=input_data,
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = _run_sudo_with_askpass(["chpasswd"], input_data=input_data)
+        
         logger.info(f"Password for {username} successfully changed")
         return True, "Password changed"
     except subprocess.CalledProcessError as e:
@@ -74,3 +106,30 @@ def list_system_users():
     except Exception as e:
         logger.error(f"Error getting list of users: {str(e)}")
         return False, str(e)
+
+def verify_user_password(username: str, password: str) -> bool:
+    """Verifies a user's password by checking it against the hash in /etc/shadow."""
+    try:
+        # We need sudo to read /etc/shadow
+        # We search for the line starting with "username:"
+        command = ["grep", f"^{username}:", "/etc/shadow"]
+        result = _run_sudo_with_askpass(command, check=False)
+        
+        if result.returncode != 0 or not result.stdout:
+            logger.error(f"User {username} not found in /etc/shadow")
+            return False
+            
+        line = result.stdout.strip()
+        parts = line.split(":")
+        if len(parts) < 2:
+            return False
+            
+        stored_hash = parts[1]
+        
+        # crypt.crypt(password, salt) where salt is the stored hash
+        # It automatically extracts the salt from the hash.
+        return crypt.crypt(password, stored_hash) == stored_hash
+        
+    except Exception as e:
+        logger.error(f"Error verifying password for {username}: {str(e)}")
+        return False
