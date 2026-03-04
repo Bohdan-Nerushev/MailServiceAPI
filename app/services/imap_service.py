@@ -18,10 +18,11 @@ def fetch_inbox(username, password, limit=1000):
             for msg in mailbox.fetch(limit=limit, reverse=True):
                 messages.append({
                     "uid": msg.uid,
-                    "from": msg.from_,
-                    "subject": msg.subject,
-                    "date": str(msg.date),
+                    "sender": msg.from_ if msg.from_ else "Unknown",
+                    "subject": msg.subject if msg.subject else "(No Subject)",
+                    "date": str(msg.date.strftime("%d %b, %H:%M")),
                     "text": msg.text,
+                    "snippet": msg.text[:100] if msg.text else "",
                     "seen": msg.flags
                 })
 

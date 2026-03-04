@@ -39,7 +39,9 @@ async def register_page(request: Request):
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: str = None):
-    return templates.TemplateResponse("login.html", {"request": request, "error": error})
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+    return templates.TemplateResponse("login.html", {"request": request, "error": error, "users": usernames})
 
 @router.get("/users", response_class=HTMLResponse)
 async def users_list_page(request: Request):
@@ -93,8 +95,14 @@ async def inbox_page(request: Request, error: str = None):
     
     success, mails = imap_service.fetch_inbox(user["username"], user["password"])
     if not success:
-        # If IMAP fails, likely password issue or service down
-        return templates.TemplateResponse("login.html", {"request": request, "error": f"IMAP Error: {mails}"})
+        # Fetch users again for the login page re-render
+        _, user_details = user_manager.list_system_users()
+        usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+        return templates.TemplateResponse("login.html", {
+            "request": request, 
+            "error": f"IMAP Error: {mails}",
+            "users": usernames
+        })
     
     return templates.TemplateResponse("inbox.html", {"request": request, "mails": mails, "user": user, "error": error})
 
@@ -137,7 +145,11 @@ async def handle_register(
     # 2. Proceed with creation
     success, msg = user_manager.create_system_user(username, password)
     if success:
-        return RedirectResponse(url="/ui/users?msg=User+created", status_code=status.HTTP_303_SEE_OTHER)
+        return templates.TemplateResponse("register.html", {
+            "request": request, 
+            "success_msg": f"Користувача {username} успішно створено! Повернення до списку...",
+            "user": username
+        })
     
     return templates.TemplateResponse("register.html", {
         "request": request, 
@@ -146,7 +158,7 @@ async def handle_register(
     })
 
 @router.post("/login")
-async def handle_login(username: str = Form(...), password: str = Form(...)):
+async def handle_login(request: Request, username: str = Form(...), password: str = Form(...)):
     # Verify via system manager
     if user_manager.verify_user_password(username, password):
         # Successful login - Store in cookies for now
@@ -154,7 +166,16 @@ async def handle_login(username: str = Form(...), password: str = Form(...)):
         response.set_cookie(key="mail_user", value=username, httponly=True)
         response.set_cookie(key="mail_pass", value=password, httponly=True)
         return response
-    return RedirectResponse(url="/ui/login?error=Invalid+credentials", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Fetch users for re-rendering the login page
+    _, user_details = user_manager.list_system_users()
+    usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
+    
+    return templates.TemplateResponse("login.html", {
+        "request": request, 
+        "error": "Невірний логін або пароль",
+        "users": usernames
+    })
 
 @router.post("/logout")
 async def handle_logout():
@@ -214,13 +235,23 @@ async def handle_change_password(
 async def handle_delete_user(
     request: Request,
     username: str = Form(...),
-    password: str = Form(...)
+    password: str = Form(...),
+    confirm_delete: str = Form(...)
 ):
     # Fetch users for re-rendering if error
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
 
-    # Verify password before deletion
+    # 1. Check for DELETE word confirmation
+    if confirm_delete != "DELETE":
+        return templates.TemplateResponse("delete_user.html", {
+            "request": request, 
+            "error": "Будь ласка, введіть 'DELETE' для підтвердження",
+            "users": usernames,
+            "user": username
+        })
+
+    # 2. Verify password before deletion
     if not user_manager.verify_user_password(username, password):
         return templates.TemplateResponse("delete_user.html", {
             "request": request, 
@@ -231,7 +262,11 @@ async def handle_delete_user(
 
     success, msg = user_manager.delete_system_user(username)
     if success:
-        return RedirectResponse(url="/ui/users?msg=User+deleted", status_code=status.HTTP_303_SEE_OTHER)
+        return templates.TemplateResponse("delete_user.html", {
+            "request": request, 
+            "success_msg": f"Акаунт {username} видалено назавжди. Повернення до списку...",
+            "users": usernames
+        })
     
     return templates.TemplateResponse("delete_user.html", {
         "request": request, 

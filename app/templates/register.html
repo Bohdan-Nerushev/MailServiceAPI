@@ -15,6 +15,20 @@
         <h1 class="text-3xl font-bold font-outfit text-slate-900">Новий користувач</h1>
     </div>
 
+    <!-- Feedback Alerts -->
+    {% if success_msg %}
+    <div
+        class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center text-emerald-700 animate-slide-up shadow-lg shadow-emerald-500/10">
+        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span class="font-bold">{{ success_msg }}</span>
+    </div>
+    <script>
+        setTimeout(() => { window.location.href = "/ui/users"; }, 3000);
+    </script>
+    {% endif %}
+
     <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 animate-slide-up">
         <form action="/ui/register" method="POST" class="space-y-6">
             <div>
