@@ -58,16 +58,16 @@ async def change_password(username: str, data: UserPasswordChange):
 @router.delete("/{username}")
 async def delete_user(
     username: str,
-    x_admin_password: str = Header(
+    x_user_password: str = Header(
         ...,
-        description="Passwort ",
+        alias="X-User-Password",
+        description="Passwort des zu löschenden Benutzers",
         json_schema_extra={"format": "password"}
     )
 ):
     """Einen Benutzer und sein Postfach löschen."""
-    import os
-    if x_admin_password != os.getenv("SMTP_PASSWORD"):
-        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    if not user_manager.verify_user_password(username, x_user_password):
+        raise HTTPException(status_code=401, detail="Ungültiges Benutzerpasswort")
         
     success, message = user_manager.delete_system_user(username)
     if not success:
