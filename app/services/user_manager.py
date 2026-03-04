@@ -91,17 +91,22 @@ def change_user_password(username: str, password: str):
         return False, e.stderr
 
 def list_system_users():
-    """Return a list of all real system users (UID >= 1000)."""
+    """Return a list of all real system users (UID >= 1000) with details."""
     try:
         users = []
         with open("/etc/passwd", "r") as f:
             for line in f:
                 parts = line.split(":")
-                if len(parts) > 2:
+                if len(parts) > 5:
                     uid = int(parts[2])
-                    # UID >= 1000 — das ist normalerweise erstellte Benutzer, < 65534 (nobody)
+                    # UID >= 1000 — das ist normalerweise erstellte Benutzer
                     if 1000 <= uid < 65534:
-                        users.append(parts[0])
+                        users.append({
+                            "username": parts[0],
+                            "uid": parts[2],
+                            "gid": parts[3],
+                            "home_dir": parts[5]
+                        })
         return True, users
     except Exception as e:
         logger.error(f"Error getting list of users: {str(e)}")

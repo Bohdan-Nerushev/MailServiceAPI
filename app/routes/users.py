@@ -15,7 +15,7 @@ class UserCreate(BaseModel):
 class UserPasswordChange(BaseModel):
     current_password: str = Field(
         ...,
-        examples=["AltesPasswort123!"],
+        examples=["SicheresPasswort123!"],
         json_schema_extra={"format": "password"}
     )
     new_password: str = Field(
@@ -43,11 +43,11 @@ async def create_user(user: UserCreate):
 @router.put("/{username}/password")
 async def change_password(username: str, data: UserPasswordChange):
     """Das Passwort eines bestehenden Benutzers ändern. Erfordert das aktuelle Passwort."""
-    # 1. Перевірка актуального пароля
+    # 1. Überprüfung des aktuellen Passworts
     if not user_manager.verify_user_password(username, data.current_password):
-        raise HTTPException(status_code=401, detail="Невірний актуальний пароль")
+        raise HTTPException(status_code=401, detail="Nicht richtiges Passwort")
 
-    # 2. Зміна на новий пароль
+    #2. Ändern Sie Ihr Passwort.
     success, message = user_manager.change_user_password(username, data.new_password)
     if not success:
         raise HTTPException(status_code=400, detail=f"Passwort konnte nicht geändert werden: {message}")

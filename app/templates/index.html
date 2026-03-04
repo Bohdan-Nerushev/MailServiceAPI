@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Головна - Mail Service API{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Hero Section -->
+    <div class="text-center mb-12 animate-slide-up">
+        <h1 class="text-4xl sm:text-5xl font-extrabold font-outfit text-slate-900 mb-4 tracking-tight">
+            Керування Вашим <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">Поштовим
+                Сервером</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            Простий, але потужний веб-інтерфейс для адміністрування облікових записів, перевірки пошти та моніторингу
+            статусу серверів Postfix та Dovecot.
+        </p>
+    </div>
+
+    <!-- Actions Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- User Management Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Новий користувач</h3>
+            <p class="text-sm text-slate-500 mb-6">Створіть системного користувача для поштової скриньки.</p>
+            <a href="/ui/register"
+                class="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-700">
+                Зареєструвати <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Login Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Вхід у пошту</h3>
+            <p class="text-sm text-slate-500 mb-6">Перегляд вхідних повідомлень та надсилання листів.</p>
+            <a href="/ui/login"
+                class="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+                Увійти <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Change Password Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Зміна пароля</h3>
+            <p class="text-sm text-slate-500 mb-6">Оновіть пароль системного користувача безпечно.</p>
+            <a href="/ui/change-password"
+                class="inline-flex items-center text-sm font-semibold text-amber-600 hover:text-amber-700">
+                Змінити <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- User List Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Список користувачів</h3>
+            <p class="text-sm text-slate-500 mb-6">Перегляд всіх активних поштових акаунтів системи.</p>
+            <a href="/ui/users"
+                class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700">
+                Переглянути <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Health Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Стан системи</h3>
+            <p class="text-sm text-slate-500 mb-6">Моніторинг статусів Postfix, Dovecot та ресурсів.</p>
+            <a href="/ui/health"
+                class="inline-flex items-center text-sm font-semibold text-rose-600 hover:text-rose-700">
+                Моніторинг <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Delete User Card -->
+        <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Видалити акаунт</h3>
+            <p class="text-sm text-slate-500 mb-6">Видалення поштової скриньки та домашньої директорії.</p>
+            <a href="/ui/delete-user"
+                class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-rose-600">
+                Видалити <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Placeholder (Hitmx powered maybe?) -->
+    <div class="mt-16 p-8 rounded-3xl bg-slate-900 shadow-2xl overflow-hidden relative group">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-transparent opacity-50 group-hover:opacity-100 transition-opacity">
+        </div>
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center text-white">
+            <div class="mb-6 md:mb-0">
+                <h2 class="text-2xl font-bold font-outfit mb-2">Готові налаштувати ваш сервер?</h2>
+                <p class="text-slate-400 max-w-md text-sm">Використовуйте Swagger документацію для автоматизації
+                    процесів через API.</p>
+            </div>
+            <a href="/docs"
+                class="px-8 py-3 bg-white text-slate-900 font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg">Відкрити
+                API Docs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,15 @@
 import os
 from fastapi import FastAPI
+import logging
 from dotenv import load_dotenv
 
-import logging
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-# Налаштування логування у файл
+# Setup for templates and static files
+templates = Jinja2Templates(directory="app/templates")
+
+# Protokollierung in eine Datei konfigurieren
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -16,7 +21,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Завантажуємо змінні оточення
+# Umgebungsvariablen laden
 load_dotenv()
 
 from app.routes import users, mail
@@ -43,6 +48,10 @@ app = FastAPI(
     version="0.1.0",
     openapi_tags=tags_metadata
 )
+
+# Mounting static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 from app.services import system_service
 
@@ -79,13 +88,17 @@ async def health_check():
         }
     }
 
-# Підключаємо роути
+from app.routes import users, mail, ui
+
+# --- Same as before ---
 app.include_router(users.router)
 app.include_router(mail.router)
+app.include_router(ui.router)
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return {"message": "Mail Service API ist aktiv. Gehen Sie zu /docs für die Dokumentation."}
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/ui/")
 
 if __name__ == "__main__":
     import uvicorn

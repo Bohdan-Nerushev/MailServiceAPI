@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Стан системи - Mail Service API{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-10">
+        <div>
+            <h1 class="text-3xl font-bold font-outfit text-slate-900">Моніторинг сервісів</h1>
+            <p class="text-slate-500">Реальний стан поштового серверу та ресурсів</p>
+        </div>
+        <button hx-get="/ui/health" hx-target="#health-grid" hx-select="#health-grid" hx-swap="outerHTML"
+            class="p-3 bg-slate-900 text-white rounded-xl hover:rotate-180 transition-all duration-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                </path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Health Dashboard -->
+    <div id="health-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-fade-in">
+        <!-- Postfix Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
+            <div
+                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_services.postfix.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Postfix</h3>
+            <span
+                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_services.postfix.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
+                {% if health.mail_services.postfix.is_active %}Активний{% else %}Зупинено{% endif %}
+            </span>
+            <p class="text-xs text-slate-400 mt-4">{{ health.mail_services.postfix.MainPID or 'PID невідомий' }}
+            </p>
+        </div>
+
+        <!-- Dovecot Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
+            <div
+                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_services.dovecot.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Dovecot</h3>
+            <span
+                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_services.dovecot.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
+                {% if health.mail_services.dovecot.is_active %}Активний{% else %}Зупинено{% endif %}
+            </span>
+            <p class="text-xs text-slate-400 mt-4">{{ health.mail_services.dovecot.MainPID or 'PID невідомий' }}
+            </p>
+        </div>
+
+        <!-- SpamAssassin Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
+            <div
+                class="w-16 h-16 rounded-full flex items-center justify-center mb-4 {% if health.mail_security.spamassassin.is_active %}bg-emerald-50 text-emerald-600{% else %}bg-rose-50 text-rose-600{% endif %}">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Anti-Spam</h3>
+            <span
+                class="mt-1 px-2 py-0.5 rounded-full text-xs font-bold {% if health.mail_security.spamassassin.is_active %}bg-emerald-100 text-emerald-700{% else %}bg-rose-100 text-rose-700{% endif %}">
+                {% if health.mail_security.spamassassin.is_active %}Активний{% else %}Зупинено{% endif %}
+            </span>
+            <p class="text-xs text-slate-400 mt-4">Security Score: High</p>
+        </div>
+
+        <!-- CPU/Mem Card -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="font-bold text-slate-800">Ресурси</h3>
+            <div class="w-full mt-4 space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">CPU</span>
+                    <span class="font-bold">{{ health.system_info.cpu.percent }}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-brand-600" style="width: {{ health.system_info.cpu.percent }}%"></div>
+                </div>
+                <div class="flex justify-between text-xs pt-2">
+                    <span class="text-slate-500">RAM</span>
+                    <span class="font-bold">{{ health.system_info.memory.percent }}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-indigo-600" style="width: {{ health.system_info.memory.percent }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Table -->
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h4 class="font-bold text-slate-800">Мережева інформація</h4>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-3 font-semibold">Інтерфейс</th>
+                        <th class="px-6 py-3 font-semibold">IP Адреса</th>
+                        <th class="px-6 py-3 font-semibold">Маска</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                    {% for iface in health.network_info.interfaces %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 font-medium text-slate-700">{{ iface.name }}</td>
+                        <td class="px-6 py-4 font-mono text-slate-500">
+                            {% for addr in iface.addresses %}
+                            {% if 'AF_INET' in addr.family and not 'AF_INET6' in addr.family %}
+                            <div class="py-0.5">{{ addr.addr }}</div>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="px-6 py-4 text-slate-400">
+                            {% for addr in iface.addresses %}
+                            {% if 'AF_INET' in addr.family and not 'AF_INET6' in addr.family %}
+                            <div class="py-0.5">{{ addr.netmask or 'N/A' }}</div>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

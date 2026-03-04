@@ -54,6 +54,8 @@ def get_service_status(service_name: str) -> bool:
         logger.error(f"Fehler beim Überprüfen des Dienstes {service_name}: {str(e)}")
         return False
 
+import psutil
+
 def get_system_info():
     """Sammelt detaillierte Informationen über die Maschine."""
     info = {}
@@ -61,32 +63,37 @@ def get_system_info():
         # OS Info
         info["os"] = subprocess.getoutput("uname -sr")
         info["hostname"] = subprocess.getoutput("hostname")
-        info["hostnamectl"] = subprocess.getoutput("hostnamectl").split("\n")
         
         # Uptime
         info["uptime"] = subprocess.getoutput("uptime -p")
         
-        # CPU Load
-        load = subprocess.getoutput("cat /proc/loadavg").split()
-        if len(load) >= 3:
-            info["cpu_load"] = {"1min": load[0], "5min": load[1], "15min": load[2]}
+        # CPU
+        info["cpu"] = {
+            "percent": psutil.cpu_percent(interval=None),
+            "count": psutil.cpu_count(),
+            "load_1min": os.getloadavg()[0]
+        }
             
-        # Memory Info (in MB)
-        mem = subprocess.getoutput("free -m | grep Mem").split()
-        if len(mem) >= 3:
-            info["memory"] = {"total": f"{mem[1]}MB", "used": f"{mem[2]}MB", "free": f"{mem[3]}MB"}
+        # Memory
+        mem = psutil.virtual_memory()
+        info["memory"] = {
+            "total": f"{mem.total // (1024**2)}MB",
+            "used": f"{mem.used // (1024**2)}MB", 
+            "free": f"{mem.available // (1024**2)}MB",
+            "percent": mem.percent
+        }
             
-        # Disk Usage (Root partition)
-        disk = subprocess.getoutput("df -h / | tail -1").split()
-        if len(disk) >= 4:
-            info["disk_usage"] = {"total": disk[1], "used": disk[2], "available": disk[3], "percent": disk[4]}
+        # Disk
+        disk = psutil.disk_usage('/')
+        info["disk_usage"] = {
+            "total": f"{disk.total // (1024**3)}GB",
+            "used": f"{disk.used // (1024**3)}GB",
+            "available": f"{disk.free // (1024**3)}GB",
+            "percent": f"{disk.percent}%"
+        }
             
         # IP Addresses
-        ips = subprocess.getoutput("hostname -I").split()
-        info["ip_addresses"] = ips
-
-        hostCtl = subprocess.getoutput("hostnamectl").split("\n")
-        info["hostnameCTL"] = hostCtl
+        info["ip_addresses"] = subprocess.getoutput("hostname -I").split()
         
     except Exception as e:
         logger.error(f"Fehler beim Sammeln von Systeminfos: {str(e)}")
@@ -133,27 +140,28 @@ def get_service_details(service_name: str) -> dict:
 
 def get_network_info() -> dict:
     """Sammelt Informationen über die Netzwerkkonfiguration und Firewall."""
-    info = {}
+    info = {"interfaces": [], "firewall": [], "listening_ports": []}
     try:
-        # IP Routing-Tabelle
-        route_res = subprocess.run(["ip", "route"], capture_output=True, text=True)
-        info["routing"] = route_res.stdout.splitlines()
-
-        # Netzwerkschnittstellen (Interfaces)
-        addr_res = subprocess.run(["ip", "-brief", "address"], capture_output=True, text=True)
-        info["interfaces"] = addr_res.stdout.splitlines()
+        # Structured Interfaces via psutil
+        for name, addrs in psutil.net_if_addrs().items():
+            if_info = {"name": name, "addresses": []}
+            for addr in addrs:
+                if_info["addresses"].append({
+                    "family": str(addr.family),
+                    "addr": addr.address,
+                    "netmask": addr.netmask
+                })
+            info["interfaces"].append(if_info)
 
         # Firewall Status (UFW)
-        # Hinweis: Ohne sudo-Rechte könnte dies eingeschränkt sein
         ufw_res = run_sudo_command(["ufw", "status"])
         if ufw_res.returncode == 0:
             info["firewall"] = ufw_res.stdout.splitlines()
         else:
-            info["firewall"] = ["Fehlende Berechtigungen (sudo) für UFW oder UFW nicht installiert.", ufw_res.stderr.strip()]
+            info["firewall"] = ["Permission Error or UFW not installed"]
             
-        # Aktive Ports (Listening)
+        # Listening Ports
         ss_res = subprocess.run(["ss", "-tulpn"], capture_output=True, text=True)
-        # Filtere nur die ersten 15 Zeilen, um die Antwort nicht zu groß zu machen
         info["listening_ports"] = ss_res.stdout.splitlines()[:15]
 
     except Exception as e:
