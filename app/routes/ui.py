@@ -88,23 +88,36 @@ async def delete_user_page(request: Request):
     return templates.TemplateResponse("delete_user.html", {"request": request, "users": usernames})
 
 @router.get("/inbox", response_class=HTMLResponse)
-async def inbox_page(request: Request, error: str = None):
+async def inbox_page(request: Request, folder: str = "INBOX", error: str = None):
     user = get_session_user(request)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
-    success, mails = imap_service.fetch_inbox(user["username"], user["password"])
+    # Use the refactored fetch_emails with folder and limit=10
+    success, mails = imap_service.fetch_emails(
+        user["username"], 
+        user["password"], 
+        folder=folder, 
+        limit=10
+    )
+    
     if not success:
-        # Fetch users again for the login page re-render
+        # Fetch users again for the login page re-render if it's a login error
         _, user_details = user_manager.list_system_users()
         usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
         return templates.TemplateResponse("login.html", {
             "request": request, 
-            "error": f"IMAP Error: {mails}",
+            "error": f"IMAP Error ({folder}): {mails}",
             "users": usernames
         })
     
-    return templates.TemplateResponse("inbox.html", {"request": request, "mails": mails, "user": user, "error": error})
+    return templates.TemplateResponse("inbox.html", {
+        "request": request, 
+        "mails": mails, 
+        "user": user, 
+        "current_folder": folder,
+        "error": error
+    })
 
 @router.get("/compose", response_class=HTMLResponse)
 async def compose_page(request: Request, error: str = None):
@@ -114,16 +127,16 @@ async def compose_page(request: Request, error: str = None):
     return templates.TemplateResponse("compose.html", {"request": request, "user": user, "error": error})
 
 @router.get("/mail/{uid}", response_class=HTMLResponse)
-async def view_mail_page(request: Request, uid: str):
+async def view_mail_page(request: Request, uid: str, folder: str = "INBOX"):
     user = get_session_user(request)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
-    success, mail = imap_service.fetch_message_by_uid(user["username"], user["password"], uid)
+    success, mail = imap_service.fetch_message_by_uid(user["username"], user["password"], uid, folder=folder)
     if not success:
-        return RedirectResponse(url="/ui/inbox", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={mail}", status_code=status.HTTP_303_SEE_OTHER)
     
-    return templates.TemplateResponse("view_mail.html", {"request": request, "mail": mail, "user": user})
+    return templates.TemplateResponse("view_mail.html", {"request": request, "mail": mail, "user": user, "current_folder": folder})
 
 # --- POST Routes (Actions) ---
 
@@ -276,12 +289,35 @@ async def handle_delete_user(
     })
 
 @router.post("/compose")
-async def handle_send_mail(request: Request, to: str = Form(...), subject: str = Form(...), body: str = Form(...)):
+async def handle_send_mail(
+    request: Request, 
+    to: str = Form(...), 
+    subject: str = Form(...), 
+    body: str = Form(...)
+):
     user = get_session_user(request)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
-    # Simple SMTP send
-    # Note: smtp_service Expects specific arguments
-    # I'll check smtp_service.send_mail signature later if it fails
-    return RedirectResponse(url="/ui/inbox", status_code=status.HTTP_303_SEE_OTHER)
+    # Actually send the email using SMTP service
+    success, msg = await smtp_service.send_email(
+        to_email=to,
+        subject=subject,
+        body=body,
+        from_email=f"{user['username']}@{os.getenv('DOMAIN', '127.0.0.1')}"
+    )
+    
+    if success:
+        return templates.TemplateResponse("compose.html", {
+            "request": request,
+            "success_msg": "Лист успішно надіслано! Повернення до вхідних...",
+            "recipient": to
+        })
+    
+    return templates.TemplateResponse("compose.html", {
+        "request": request,
+        "error": f"Помилка відправлення: {msg}",
+        "recipient": to,
+        "subject": subject,
+        "body": body
+    })
