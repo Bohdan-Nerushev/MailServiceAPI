@@ -6,27 +6,27 @@ import aiosmtplib
 logger = logging.getLogger(__name__)
 
 async def send_email(to_email: str, subject: str, body: str, from_email: str = None):
-    """Надсилає лист через асинхронний SMTP клієнт."""
+    """Send an email through an asynchronous SMTP client."""
     
-    # Створюємо об'єкт повідомлення
+    # Erstellen Sie ein E-Mail-Objekt
     message = EmailMessage()
     message["From"] = from_email or os.getenv("SMTP_USER")
     message["To"] = to_email
     message["Subject"] = subject
     message.set_content(body)
 
-    # Параметри сервера з .env
+    # Parameter des Servers aus .env
     hostname = os.getenv("SMTP_SERVER", "localhost")
     port = int(os.getenv("SMTP_PORT", 587))
     username = os.getenv("SMTP_USER")
     password = os.getenv("SMTP_PASSWORD")
 
     try:
-        # Для порту 25 на localhost часто не потрібна авторизація
+        # Für Port 25 auf localhost ist die Authentifizierung oft nicht erforderlich
         is_local = hostname in ["localhost", "127.0.0.1"]
         use_auth = not (is_local and port == 25)
 
-        # Параметри підключення
+        # Parameter der Verbindung
         smtp_args = {
             "hostname": hostname,
             "port": port,
@@ -34,14 +34,14 @@ async def send_email(to_email: str, subject: str, body: str, from_email: str = N
             "start_tls": (port == 587)
         }
 
-        # Додаємо авторизацію тільки якщо вона потрібна
+        # Hinzufugen der Authentifizierung, wenn sie notwendig ist
         if use_auth and username and password:
             smtp_args["username"] = username
             smtp_args["password"] = password
 
         await aiosmtplib.send(message, **smtp_args)
-        logger.info(f"Лист успішно надіслано на {to_email}")
-        return True, "Лист надіслано"
+        logger.info(f"E-Mail erfolgreich versendet an {to_email}")
+        return True, "E-Mail versendet"
     except Exception as e:
-        logger.error(f"Помилка SMTP: {str(e)}")
+        logger.error(f"SMTP-Fehler: {str(e)}")
         return False, str(e)

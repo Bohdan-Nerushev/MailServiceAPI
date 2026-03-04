@@ -1,14 +1,14 @@
 import subprocess
 import logging
 
-# Налаштування логування
+# Einstellen Logging 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def run_command(command: list):
-    """Допоміжна функція для виконання системних команд через sudo."""
+    """Helper function to execute system commands via sudo."""
     try:
-        # Додаємо sudo до кожної команди
+        # Add sudo to each command
         full_command = ["sudo"] + command
         result = subprocess.run(
             full_command, 
@@ -23,25 +23,25 @@ def run_command(command: list):
         return False, e.stderr
 
 def create_system_user(username: str, password: str):
-    """Створює системного користувача Linux без доступу до оболонки (для пошти)."""
-    # -m: створити домашню директорію
-    # -s /usr/sbin/nologin: заборонити вхід у термінал (безпека)
+    """Erstellen Sie ein Systembenutzerkonto Linux ohne Shell-Zugriff (für die E-Mail)."""
+    # -m: erstellt die Home-Verzeichnis
+    # -s /usr/sbin/nologin: verhindert den Zugriff auf die Shell (Sicherheit)
     success, msg = run_command(["useradd", "-m", "-s", "/usr/sbin/nologin", username])
     if not success:
         return False, msg
     
-    # Встановлюємо пароль
+    # Passwort setzen
     return change_user_password(username, password)
 
 def delete_system_user(username: str):
-    """Видаляє користувача та його домашню директорію."""
-    # -r: видалити домашню директорію разом з юзером
+    """Delete the user and their home directory."""
+    # -r: delete the home directory along with the user
     return run_command(["userdel", "-r", username])
 
 def change_user_password(username: str, password: str):
-    """Змінює пароль існуючого користувача."""
+    """Change the password of an existing user."""
     try:
-        # Для chpasswd ми передаємо "user:pass" у stdin
+        # For chpasswd we pass "user:pass" to stdin
         full_command = ["sudo", "chpasswd"]
         input_data = f"{username}:{password}"
         
@@ -52,14 +52,14 @@ def change_user_password(username: str, password: str):
             text=True,
             check=True
         )
-        logger.info(f"Пароль для {username} успішно змінено")
-        return True, "Пароль змінено"
+        logger.info(f"Password for {username} successfully changed")
+        return True, "Password changed"
     except subprocess.CalledProcessError as e:
-        logger.error(f"Помилка зміни пароля для {username}: {e.stderr}")
+        logger.error(f"Error changing password for {username}: {e.stderr}")
         return False, e.stderr
 
 def list_system_users():
-    """Повертає список усіх реальних користувачів системи (UID >= 1000)."""
+    """Return a list of all real system users (UID >= 1000)."""
     try:
         users = []
         with open("/etc/passwd", "r") as f:
@@ -67,10 +67,10 @@ def list_system_users():
                 parts = line.split(":")
                 if len(parts) > 2:
                     uid = int(parts[2])
-                    # UID >= 1000 — це зазвичай створені користувачі, < 65534 (nobody)
+                    # UID >= 1000 — das ist normalerweise erstellte Benutzer, < 65534 (nobody)
                     if 1000 <= uid < 65534:
                         users.append(parts[0])
         return True, users
     except Exception as e:
-        logger.error(f"Помилка отримання списку користувачів: {str(e)}")
+        logger.error(f"Error getting list of users: {str(e)}")
         return False, str(e)

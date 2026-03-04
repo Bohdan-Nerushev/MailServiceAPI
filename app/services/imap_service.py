@@ -7,14 +7,14 @@ from imap_tools import MailBox, AND
 logger = logging.getLogger(__name__)
 
 def fetch_inbox(username, password, limit=1000):
-    """Отримує список останніх листів з папки INBOX."""
+    """Erhalten Sie eine Liste der letzten Briefe aus der INBOX."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
 
     try:
-        # Підключаємося до сервера
+        # verbinden sich mit dem Server
         with MailBox(imap_server).login(username, password, 'INBOX') as mailbox:
             messages = []
-            # Отримуємо останні N листів (сортування за датою від нових)
+            # erhalten Sie die letzten N Briefe (sortiert nach Datum absteigend)
             for msg in mailbox.fetch(limit=limit, reverse=True):
                 messages.append({
                     "uid": msg.uid,
@@ -27,17 +27,17 @@ def fetch_inbox(username, password, limit=1000):
 
             return True, messages
     except Exception as e:
-        logger.error(f"Помилка IMAP (fetch): {str(e)}")
+        logger.error(f"IMAP-Fehler (fetch): {str(e)}")
         return False, str(e)
 
 
 def fetch_message_by_uid(username, password, uid):
-    """Отримує повний текст конкретного листа за його UID."""
+    """Erhalten Sie den vollständigen Text eines bestimmten Briefes anhand seiner UID."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     
     try:
         with MailBox(imap_server).login(username, password, 'INBOX') as mailbox:
-            # Шукаємо лист за UID
+            # Suchen Sie den Brief anhand seiner UID
             for msg in mailbox.fetch(AND(uid=uid)):
                 return True, {
                     "uid": msg.uid,
