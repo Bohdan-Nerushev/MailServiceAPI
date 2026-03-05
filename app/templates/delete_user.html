@@ -15,13 +15,15 @@
         <h1 class="text-3xl font-bold font-outfit">{{ _('del_page_title') }}</h1>
     </div>
 
-    {% if success_msg %}
+    {% if success_key or success_msg %}
     <div
         class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center text-emerald-700 animate-slide-up shadow-lg shadow-emerald-500/10">
         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span class="font-bold">{% if success_key %}{% set _tpl = _(success_key) %}{% if success_args %}{{ _tpl.format(**success_args) }}{% else %}{{ _tpl }}{% endif %}{% elif success_msg %}{{ success_msg }}{% endif %}</span>
+        <span class="font-bold">{% if success_key %}{% set _tpl = _(success_key) %}{% if success_args %}{{
+            _tpl.format(**success_args) }}{% else %}{{ _tpl }}{% endif %}{% elif success_msg %}{{ success_msg }}{% endif
+            %}</span>
     </div>
     <script>
         setTimeout(() => { window.location.href = "/ui/users"; }, 3000);

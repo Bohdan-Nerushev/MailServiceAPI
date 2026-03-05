@@ -29,6 +29,12 @@ def render_template(name: str, context: dict, status_code: int = 200, headers: d
         
     context["_"] = lambda key: i18n_service.gettext(key, lang)
     context["current_lang"] = lang
+
+    if headers is None:
+        headers = {}
+    headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    headers["Pragma"] = "no-cache"
+    headers["Expires"] = "0"
     
     response = templates.TemplateResponse(name, context, status_code=status_code, headers=headers)
     
@@ -57,6 +63,10 @@ async def register_page(request: Request):
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: str = None):
+    user = get_session_user(request)
+    if user and not error:
+        return RedirectResponse(url="/ui/inbox", status_code=status.HTTP_303_SEE_OTHER)
+        
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
     return render_template("login.html", {"request": request, "error": error, "users": usernames})
