@@ -22,10 +22,8 @@
                     </path>
                 </svg>
                 Вхідні
-                {% if current_folder == 'INBOX' %}
-                <span class="ml-auto text-xs py-0.5 px-2 bg-brand-100 rounded-full">{{ (mails | length) if mails else 0
+                <span class="ml-auto text-xs py-0.5 px-2 bg-brand-100 rounded-full">{{ counts.INBOX if counts else 0
                     }}</span>
-                {% endif %}
             </a>
             <a href="/ui/inbox?folder=Sent"
                 class="flex items-center px-4 py-3 {% if current_folder == 'Sent' %}bg-brand-50 text-brand-700 font-bold{% else %}text-slate-600 hover:bg-slate-100{% endif %} rounded-xl transition-all">
@@ -34,6 +32,8 @@
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
                 Відправлені
+                <span class="ml-auto text-xs py-0.5 px-2 bg-slate-100 rounded-full">{{ counts.Sent if counts else 0
+                    }}</span>
             </a>
             <a href="/ui/inbox?folder=Trash"
                 class="flex items-center px-4 py-3 {% if current_folder == 'Trash' %}bg-brand-50 text-brand-700 font-bold{% else %}text-slate-600 hover:bg-slate-100{% endif %} rounded-xl transition-all">
@@ -43,6 +43,8 @@
                     </path>
                 </svg>
                 Кошик
+                <span class="ml-auto text-xs py-0.5 px-2 bg-slate-100 rounded-full">{{ counts.Trash if counts else 0
+                    }}</span>
             </a>
         </nav>
     </aside>
@@ -78,7 +80,33 @@
                         <p class="text-xs text-slate-500 line-clamp-1 mt-1">{{ mail.snippet or 'Перегляньте вміст
                             листа...' }}</p>
                     </div>
-                    {% if "SPAM" in (mail.subject | upper) %}
+                    {% if current_folder == 'Trash' %}
+                    <div class="flex space-x-2 ml-4 self-center">
+                        <form action="/ui/mail/{{ mail.uid }}/restore" method="POST"
+                            onsubmit="return confirm('Ви точно впевнені, що хочете відновити цей лист?')">
+                            <button type="submit"
+                                class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                                title="Відновити">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                </svg>
+                            </button>
+                        </form>
+                        <form action="/ui/mail/{{ mail.uid }}/permanent-delete" method="POST"
+                            onsubmit="return confirm('Ви точно впевнені, що хочете остаточно видалити цей лист? Відновити його буде неможливо.')">
+                            <button type="submit"
+                                class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                title="Остаточно видалити">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                    </path>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                    {% elif "SPAM" in (mail.subject | upper) %}
                     <span class="ml-4 p-1 rounded-md bg-rose-50 text-rose-500">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"

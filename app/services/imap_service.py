@@ -1,7 +1,5 @@
 import os
 import logging
-from pprint import pprint
-
 from imap_tools import MailBox, AND
 
 logger = logging.getLogger(__name__)
@@ -58,15 +56,46 @@ def fetch_message_by_uid(username, password, uid, folder='INBOX'):
         logger.error(f"Помилка IMAP (message, {folder}): {str(e)}")
         return False, str(e)
 
-def delete_message_by_uid(username, password, uid):
-    """Löscht eine E-Mail anhand ihrer UID."""
+def delete_permanent(username, password, uid, folder='INBOX'):
+    """Видаляє лист назавжди з вказаної папки."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     
     try:
-        with MailBox(imap_server).login(username, password, 'INBOX') as mailbox:
-            # Markiert die E-Mail als gelöscht und entfernt sie
+        with MailBox(imap_server).login(username, password, folder) as mailbox:
             mailbox.delete(uid)
-            return True, f"E-Mail mit UID {uid} wurde gelöscht"
+            return True, f"Лист {uid} видалено назавжди з {folder}"
     except Exception as e:
-        logger.error(f"Fehler beim Löschen der E-Mail (UID {uid}): {str(e)}")
+        logger.error(f"Помилка видалення (UID {uid}, folder {folder}): {str(e)}")
+        return False, str(e)
+
+def move_message(username, password, uid, source_folder, target_folder):
+    """Переміщує лист з однієї папки в іншу."""
+    imap_server = os.getenv("IMAP_SERVER", "localhost")
+    
+    try:
+        with MailBox(imap_server).login(username, password, source_folder) as mailbox:
+            # Створюємо цільову папку, якщо вона не існує
+            if target_folder not in [f.name for f in mailbox.folder.list()]:
+                 mailbox.folder.create(target_folder)
+            
+            mailbox.move(uid, target_folder)
+            return True, f"Лист переміщено в {target_folder}"
+    except Exception as e:
+        logger.error(f"Помилка переміщення (UID {uid}, {source_folder} -> {target_folder}): {str(e)}")
+        return False, str(e)
+def fetch_folder_counts(username, password):
+    """Отримує кількість листів у папках INBOX, Sent та Trash."""
+    imap_server = os.getenv("IMAP_SERVER", "localhost")
+    counts = {"INBOX": 0, "Sent": 0, "Trash": 0}
+    
+    try:
+        with MailBox(imap_server).login(username, password) as mailbox:
+            folders = [f.name for f in mailbox.folder.list()]
+            for folder in counts.keys():
+                if folder in folders:
+                    mailbox.folder.set(folder)
+                    counts[folder] = mailbox.folder.status(folder).get('MESSAGES', 0)
+            return True, counts
+    except Exception as e:
+        logger.error(f"Помилка отримання лічильників: {str(e)}")
         return False, str(e)

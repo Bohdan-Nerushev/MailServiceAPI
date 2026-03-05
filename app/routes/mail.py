@@ -35,7 +35,7 @@ async def get_inbox(
     )
 ):
     """Liste der neuesten E-Mails im Posteingang abrufen."""
-    success, result = imap_service.fetch_inbox(username, x_password)
+    success, result = imap_service.fetch_emails(username, x_password)
     if not success:
         raise HTTPException(status_code=401, detail=f"Login- oder IMAP-Fehler: {result}")
     return {"inbox": result}
@@ -67,7 +67,7 @@ async def delete_message(
     )
 ):
     """Eine E-Mail anhand ihrer UID dauerhaft löschen."""
-    success, result = imap_service.delete_message_by_uid(username, x_password, uid)
+    success, result = imap_service.delete_permanent(username, x_password, uid)
     if not success:
         raise HTTPException(status_code=400, detail=f"Fehler: {result}")
     return {"message": result}

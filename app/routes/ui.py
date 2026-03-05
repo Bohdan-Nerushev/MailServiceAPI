@@ -93,13 +93,14 @@ async def inbox_page(request: Request, folder: str = "INBOX", error: str = None)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
-    # Use the refactored fetch_emails with folder and limit=10
     success, mails = imap_service.fetch_emails(
         user["username"], 
         user["password"], 
         folder=folder, 
         limit=10
     )
+    # Отримуємо лічильники для бокової панелі
+    _, counts = imap_service.fetch_folder_counts(user["username"], user["password"])
     
     if not success:
         # Fetch users again for the login page re-render if it's a login error
@@ -116,7 +117,8 @@ async def inbox_page(request: Request, folder: str = "INBOX", error: str = None)
         "mails": mails, 
         "user": user, 
         "current_folder": folder,
-        "error": error
+        "error": error,
+        "counts": counts
     })
 
 @router.get("/compose", response_class=HTMLResponse)
@@ -124,7 +126,9 @@ async def compose_page(request: Request, error: str = None):
     user = get_session_user(request)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
-    return templates.TemplateResponse("compose.html", {"request": request, "user": user, "error": error})
+    
+    _, counts = imap_service.fetch_folder_counts(user["username"], user["password"])
+    return templates.TemplateResponse("compose.html", {"request": request, "user": user, "error": error, "counts": counts})
 
 @router.get("/mail/{uid}", response_class=HTMLResponse)
 async def view_mail_page(request: Request, uid: str, folder: str = "INBOX"):
@@ -133,10 +137,18 @@ async def view_mail_page(request: Request, uid: str, folder: str = "INBOX"):
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
     success, mail = imap_service.fetch_message_by_uid(user["username"], user["password"], uid, folder=folder)
+    _, counts = imap_service.fetch_folder_counts(user["username"], user["password"])
+    
     if not success:
         return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={mail}", status_code=status.HTTP_303_SEE_OTHER)
     
-    return templates.TemplateResponse("view_mail.html", {"request": request, "mail": mail, "user": user, "current_folder": folder})
+    return templates.TemplateResponse("view_mail.html", {
+        "request": request,
+        "mail": mail,
+        "user": user,
+        "current_folder": folder,
+        "counts": counts
+    })
 
 # --- POST Routes (Actions) ---
 
@@ -300,11 +312,13 @@ async def handle_send_mail(
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
     # Actually send the email using SMTP service
+    # Fix: User reported 127.0.0.1 syntax error. Try 'localhost' or just the hostname.
+    domain = os.getenv('DOMAIN', 'localhost')
     success, msg = await smtp_service.send_email(
         to_email=to,
         subject=subject,
         body=body,
-        from_email=f"{user['username']}@{os.getenv('DOMAIN', '127.0.0.1')}"
+        from_email=f"{user['username']}@{domain}"
     )
     
     if success:
@@ -321,3 +335,43 @@ async def handle_send_mail(
         "subject": subject,
         "body": body
     })
+@router.post("/mail/{uid}/delete")
+async def handle_delete_mail(request: Request, uid: str, folder: str = "INBOX"):
+    user = get_session_user(request)
+    if not user:
+        return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Move to Trash
+    success, msg = imap_service.move_message(user["username"], user["password"], uid, folder, "Trash")
+    
+    if success:
+        return templates.TemplateResponse("view_mail.html", {
+            "request": request,
+            "success_msg": "Лист переміщено до кошика. Повернення...",
+            "mail": {"uid": uid}, # Placeholder for template logic
+            "user": user,
+            "current_folder": folder,
+            "redirect_url": f"/ui/inbox?folder={folder}"
+        })
+    
+    return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={msg}", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/mail/{uid}/restore")
+async def handle_restore_mail(request: Request, uid: str):
+    user = get_session_user(request)
+    if not user:
+        return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Restore from Trash to INBOX
+    success, msg = imap_service.move_message(user["username"], user["password"], uid, "Trash", "INBOX")
+    return RedirectResponse(url="/ui/inbox?folder=Trash", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/mail/{uid}/permanent-delete")
+async def handle_permanent_delete_mail(request: Request, uid: str):
+    user = get_session_user(request)
+    if not user:
+        return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Final deletion from Trash
+    success, msg = imap_service.delete_permanent(user["username"], user["password"], uid, "Trash")
+    return RedirectResponse(url="/ui/inbox?folder=Trash", status_code=status.HTTP_303_SEE_OTHER)

@@ -4,8 +4,23 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
+    <!-- Feedback Alerts -->
+    {% if success_msg %}
+    <div
+        class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center text-emerald-700 animate-slide-up shadow-lg shadow-emerald-500/10">
+        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span class="font-bold">{{ success_msg }}</span>
+    </div>
+    <script>
+        setTimeout(() => { window.location.href = "{{ redirect_url or '/ui/inbox' }}"; }, 3000);
+    </script>
+    {% endif %}
+
     <div class="mb-8 flex items-center justify-between">
-        <a href="/ui/inbox" class="flex items-center text-slate-400 hover:text-brand-600 transition-colors group">
+        <a href="/ui/inbox?folder={{ current_folder or 'INBOX' }}"
+            class="flex items-center text-slate-400 hover:text-brand-600 transition-colors group">
             <svg class="w-6 h-6 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
@@ -14,18 +29,21 @@
             Назад до списку
         </a>
         <div class="flex space-x-3">
-            <button
-                onclick="confirm('Ви впевнені, що хочете видалити цей лист?') && alert('Лист видалено (демонстрація)')"
-                class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" title="Видалити">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                    </path>
-                </svg>
-            </button>
+            <form action="/ui/mail/{{ mail.uid }}/delete?folder={{ current_folder or 'INBOX' }}" method="POST"
+                onsubmit="return confirm('Ви впевнені, що хочете видалити цей лист у кошик?')">
+                <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                    title="Видалити">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                </button>
+            </form>
         </div>
     </div>
 
+    {% if not success_msg %}
     <div
         class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-slide-up">
         <!-- Mail Header -->
@@ -34,11 +52,11 @@
             <div class="flex items-center">
                 <div
                     class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-lg mr-4">
-                    {{ mail.sender[0] | upper }}
+                    {{ mail.sender[0] | upper if mail.sender else '?' }}
                 </div>
                 <div>
-                    <div class="font-bold text-slate-800">{{ mail.sender }}</div>
-                    <div class="text-xs text-slate-500">Кому: {{ mail.to }} • {{ mail.date }}</div>
+                    <div class="font-bold text-slate-800">{{ mail.sender or 'Невідомий відправник' }}</div>
+                    <div class="text-xs text-slate-500">Кому: {{ mail.to or 'Ви' }} • {{ mail.date }}</div>
                 </div>
             </div>
         </div>
@@ -68,5 +86,6 @@
         </div>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}
