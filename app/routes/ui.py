@@ -18,6 +18,24 @@ templates.env.globals.update({
 })
 
 # --- Helpers ---
+from app.services.i18n_service import i18n_service
+
+def render_template(name: str, context: dict, status_code: int = 200, headers: dict = None):
+    request: Request = context.get("request")
+    
+    lang = request.query_params.get("lang")
+    if not lang:
+        lang = request.cookies.get("app_lang", "uk")
+        
+    context["_"] = lambda key: i18n_service.gettext(key, lang)
+    context["current_lang"] = lang
+    
+    response = templates.TemplateResponse(name, context, status_code=status_code, headers=headers)
+    
+    if "lang" in request.query_params:
+        response.set_cookie("app_lang", lang)
+        
+    return response
 
 def get_session_user(request: Request):
     """Retrieve username and password from cookies (Simple PoC session)."""
@@ -31,22 +49,22 @@ def get_session_user(request: Request):
 
 @router.get("/", response_class=HTMLResponse)
 async def home_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return render_template("index.html", {"request": request})
 
 @router.get("/register", response_class=HTMLResponse)
 async def register_page(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+    return render_template("register.html", {"request": request})
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: str = None):
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
-    return templates.TemplateResponse("login.html", {"request": request, "error": error, "users": usernames})
+    return render_template("login.html", {"request": request, "error": error, "users": usernames})
 
 @router.get("/users", response_class=HTMLResponse)
 async def users_list_page(request: Request):
     _, users = user_manager.list_system_users()
-    return templates.TemplateResponse("users_list.html", {"request": request, "users": users})
+    return render_template("users_list.html", {"request": request, "users": users})
 
 @router.get("/health", response_class=HTMLResponse)
 async def health_page(request: Request):
@@ -73,19 +91,19 @@ async def health_page(request: Request):
             "working_dir": os.getcwd()
         }
     }
-    return templates.TemplateResponse("health.html", {"request": request, "health": health_data})
+    return render_template("health.html", {"request": request, "health": health_data})
 
 @router.get("/change-password", response_class=HTMLResponse)
 async def change_password_page(request: Request):
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
-    return templates.TemplateResponse("change_password.html", {"request": request, "users": usernames})
+    return render_template("change_password.html", {"request": request, "users": usernames})
 
 @router.get("/delete-user", response_class=HTMLResponse)
 async def delete_user_page(request: Request):
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
-    return templates.TemplateResponse("delete_user.html", {"request": request, "users": usernames})
+    return render_template("delete_user.html", {"request": request, "users": usernames})
 
 @router.get("/inbox", response_class=HTMLResponse)
 async def inbox_page(request: Request, folder: str = "INBOX", error: str = None, page: int = 1):
@@ -113,13 +131,13 @@ async def inbox_page(request: Request, folder: str = "INBOX", error: str = None,
         # Fetch users again for the login page re-render if it's a login error
         _, user_details = user_manager.list_system_users()
         usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
-        return templates.TemplateResponse("login.html", {
+        return render_template("login.html", {
             "request": request, 
             "error": f"IMAP Error ({folder}): {mails}",
             "users": usernames
         })
     
-    return templates.TemplateResponse("inbox.html", {
+    return render_template("inbox.html", {
         "request": request, 
         "mails": mails, 
         "user": user, 
@@ -137,7 +155,7 @@ async def compose_page(request: Request, error: str = None):
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
     
     _, counts = imap_service.fetch_folder_counts(user["username"], user["password"])
-    return templates.TemplateResponse("compose.html", {"request": request, "user": user, "error": error, "counts": counts})
+    return render_template("compose.html", {"request": request, "user": user, "error": error, "counts": counts})
 
 @router.get("/mail/{uid}", response_class=HTMLResponse)
 async def view_mail_page(request: Request, uid: str, folder: str = "INBOX"):
@@ -151,7 +169,7 @@ async def view_mail_page(request: Request, uid: str, folder: str = "INBOX"):
     if not success:
         return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={mail}", status_code=status.HTTP_303_SEE_OTHER)
     
-    return templates.TemplateResponse("view_mail.html", {
+    return render_template("view_mail.html", {
         "request": request,
         "mail": mail,
         "user": user,
@@ -168,26 +186,26 @@ async def handle_register(
     password: str = Form(...),
     confirm_password: str = Form(...)
 ):
-    # 1. Check if passwords match
     if password != confirm_password:
-        return templates.TemplateResponse("register.html", {
-            "request": request, 
-            "error": "Паролі не збігаються",
+        return render_template("register.html", {
+            "request": request,
+            "error_key": "reg_err_passwords_mismatch",
             "user": username
         })
 
-    # 2. Proceed with creation
     success, msg = user_manager.create_system_user(username, password)
     if success:
-        return templates.TemplateResponse("register.html", {
-            "request": request, 
-            "success_msg": f"Користувача {username} успішно створено! Повернення до списку...",
+        return render_template("register.html", {
+            "request": request,
+            "success_key": "reg_success",
+            "success_args": {"username": username},
             "user": username
         })
-    
-    return templates.TemplateResponse("register.html", {
-        "request": request, 
-        "error": f"Помилка створення: {msg}",
+
+    return render_template("register.html", {
+        "request": request,
+        "error_key": "reg_err_creation",
+        "error_detail": msg,
         "user": username
     })
 
@@ -205,9 +223,9 @@ async def handle_login(request: Request, username: str = Form(...), password: st
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
     
-    return templates.TemplateResponse("login.html", {
-        "request": request, 
-        "error": "Невірний логін або пароль",
+    return render_template("login.html", {
+        "request": request,
+        "error_key": "login_err_invalid",
         "users": usernames
     })
 
@@ -230,37 +248,35 @@ async def handle_change_password(
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
 
-    # 1. Check if new passwords match
     if new_password != confirm_password:
-        return templates.TemplateResponse("change_password.html", {
-            "request": request, 
-            "error": "Нові паролі не збігаються",
+        return render_template("change_password.html", {
+            "request": request,
+            "error_key": "chpw_err_mismatch",
             "user": username,
             "users": usernames
         })
 
-    # 2. Verify current password
     if not user_manager.verify_user_password(username, current_password):
-        return templates.TemplateResponse("change_password.html", {
-            "request": request, 
-            "error": "Невірний поточний пароль",
+        return render_template("change_password.html", {
+            "request": request,
+            "error_key": "chpw_err_wrong_pass",
             "user": username,
             "users": usernames
         })
 
-    # 3. Perform the change
     success, msg = user_manager.change_user_password(username, new_password)
     if success:
-        return templates.TemplateResponse("change_password.html", {
-            "request": request, 
-            "success_msg": "Пароль успішно оновлено! Повернення до списку...",
+        return render_template("change_password.html", {
+            "request": request,
+            "success_key": "chpw_success",
             "user": username,
             "users": usernames
         })
-    
-    return templates.TemplateResponse("change_password.html", {
-        "request": request, 
-        "error": f"Помилка оновлення: {msg}",
+
+    return render_template("change_password.html", {
+        "request": request,
+        "error_key": "chpw_err_update",
+        "error_detail": msg,
         "user": username,
         "users": usernames
     })
@@ -276,35 +292,35 @@ async def handle_delete_user(
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
 
-    # 1. Check for DELETE word confirmation
     if confirm_delete != "DELETE":
-        return templates.TemplateResponse("delete_user.html", {
-            "request": request, 
-            "error": "Будь ласка, введіть 'DELETE' для підтвердження",
+        return render_template("delete_user.html", {
+            "request": request,
+            "error_key": "del_err_confirm_word",
             "users": usernames,
             "user": username
         })
 
-    # 2. Verify password before deletion
     if not user_manager.verify_user_password(username, password):
-        return templates.TemplateResponse("delete_user.html", {
-            "request": request, 
-            "error": "Невірний пароль для підтвердження видалення",
+        return render_template("delete_user.html", {
+            "request": request,
+            "error_key": "del_err_wrong_pass",
             "users": usernames,
             "user": username
         })
 
     success, msg = user_manager.delete_system_user(username)
     if success:
-        return templates.TemplateResponse("delete_user.html", {
-            "request": request, 
-            "success_msg": f"Акаунт {username} видалено назавжди. Повернення до списку...",
+        return render_template("delete_user.html", {
+            "request": request,
+            "success_key": "del_success",
+            "success_args": {"username": username},
             "users": usernames
         })
-    
-    return templates.TemplateResponse("delete_user.html", {
-        "request": request, 
-        "error": f"Помилка видалення: {msg}",
+
+    return render_template("delete_user.html", {
+        "request": request,
+        "error_key": "del_err_deletion",
+        "error_detail": msg,
         "users": usernames,
         "user": username
     })
@@ -332,15 +348,15 @@ async def handle_send_mail(
     
     if success:
         imap_service.append_to_sent(user["username"], user["password"], to, subject, body)
-        return templates.TemplateResponse("compose.html", {
+        return render_template("compose.html", {
             "request": request,
-            "success_msg": "Лист успішно надіслано! Повернення до вхідних...",
+            "success_msg": True,
             "recipient": to
         })
-    
-    return templates.TemplateResponse("compose.html", {
+
+    return render_template("compose.html", {
         "request": request,
-        "error": f"Помилка відправлення: {msg}",
+        "error": msg,
         "recipient": to,
         "subject": subject,
         "body": body
@@ -355,10 +371,10 @@ async def handle_delete_mail(request: Request, uid: str, folder: str = "INBOX"):
     success, msg = imap_service.move_message(user["username"], user["password"], uid, folder, "Trash")
     
     if success:
-        return templates.TemplateResponse("view_mail.html", {
+        return render_template("view_mail.html", {
             "request": request,
-            "success_msg": "Лист переміщено до кошика. Повернення...",
-            "mail": {"uid": uid}, # Placeholder for template logic
+            "success_msg": True,
+            "mail": {"uid": uid},
             "user": user,
             "current_folder": folder,
             "redirect_url": f"/ui/inbox?folder={folder}"

@@ -7,13 +7,11 @@
     <!-- Hero Section -->
     <div class="text-center mb-12 animate-slide-up">
         <h1 class="text-4xl sm:text-5xl font-extrabold font-outfit text-slate-900 mb-4 tracking-tight">
-            Керування Вашим <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">Поштовим
-                Сервером</span>
+            {{ _('idx_hero_title1') }} <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500">{{ _('idx_hero_title2') }}</span>
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Простий, але потужний веб-інтерфейс для адміністрування облікових записів, перевірки пошти та моніторингу
-            статусу серверів Postfix та Dovecot.
+            {{ _('idx_hero_desc') }}
         </p>
     </div>
 
@@ -29,10 +27,10 @@
                         d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Новий користувач</h3>
-            <p class="text-sm text-slate-500 mb-6">Створіть системного користувача для поштової скриньки.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card1_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card1_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-brand-600 group-hover:text-brand-700">
-                Зареєструвати <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card1_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -49,10 +47,10 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Вхід у пошту</h3>
-            <p class="text-sm text-slate-500 mb-6">Перегляд вхідних повідомлень та надсилання листів.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card2_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card2_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-emerald-600 group-hover:text-emerald-700">
-                Увійти <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card2_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -69,10 +67,10 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Зміна пароля</h3>
-            <p class="text-sm text-slate-500 mb-6">Оновіть пароль системного користувача безпечно.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card3_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card3_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-amber-600 group-hover:text-amber-700">
-                Змінити <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card3_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -89,10 +87,10 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Список користувачів</h3>
-            <p class="text-sm text-slate-500 mb-6">Перегляд всіх активних поштових акаунтів системи.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card4_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card4_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-blue-600 group-hover:text-blue-700">
-                Переглянути <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card4_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -109,10 +107,10 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Стан системи</h3>
-            <p class="text-sm text-slate-500 mb-6">Моніторинг статусів Postfix, Dovecot та ресурсів.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card5_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card5_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-rose-600 group-hover:text-rose-700">
-                Моніторинг <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card5_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -129,10 +127,10 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Видалити акаунт</h3>
-            <p class="text-sm text-slate-500 mb-6">Видалення поштової скриньки та домашньої директорії.</p>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">{{ _('idx_card6_title') }}</h3>
+            <p class="text-sm text-slate-500 mb-6">{{ _('idx_card6_desc') }}</p>
             <span class="inline-flex items-center text-sm font-semibold text-slate-600 group-hover:text-rose-600">
-                Видалити <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{ _('idx_card6_btn') }} <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </span>
@@ -146,13 +144,11 @@
         </div>
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-center text-white">
             <div class="mb-6 md:mb-0">
-                <h2 class="text-2xl font-bold font-outfit mb-2">Готові налаштувати ваш сервер?</h2>
-                <p class="text-slate-400 max-w-md text-sm">Використовуйте Swagger документацію для автоматизації
-                    процесів через API.</p>
+                <h2 class="text-2xl font-bold font-outfit mb-2">{{ _('idx_bottom_title') }}</h2>
+                <p class="text-slate-400 max-w-md text-sm">{{ _('idx_bottom_desc') }}</p>
             </div>
             <a href="/docs"
-                class="px-8 py-3 bg-white text-slate-900 font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg">Відкрити
-                API Docs</a>
+                class="px-8 py-3 bg-white text-slate-900 font-bold rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg">{{ _('idx_bottom_btn') }}</a>
         </div>
     </div>
 </div>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Видалити акаунт - Mail Service API{% endblock %}
+{% block title %}{{ _('del_page_title') }} - Mail Service API{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto">
@@ -12,17 +12,16 @@
                 </path>
             </svg>
         </a>
-        <h1 class="text-3xl font-bold font-outfit">Видалити акаунт</h1>
+        <h1 class="text-3xl font-bold font-outfit">{{ _('del_page_title') }}</h1>
     </div>
 
-    <!-- Feedback Alerts -->
     {% if success_msg %}
     <div
         class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center text-emerald-700 animate-slide-up shadow-lg shadow-emerald-500/10">
         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span class="font-bold">{{ success_msg }}</span>
+        <span class="font-bold">{% if success_key %}{% set _tpl = _(success_key) %}{% if success_args %}{{ _tpl.format(**success_args) }}{% else %}{{ _tpl }}{% endif %}{% elif success_msg %}{{ success_msg }}{% endif %}</span>
     </div>
     <script>
         setTimeout(() => { window.location.href = "/ui/users"; }, 3000);
@@ -36,18 +35,18 @@
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
                 </path>
             </svg>
-            <p class="text-sm font-medium">Ця дія видалить всі повідомлення та налаштування користувача назавжди.</p>
+            <p class="text-sm font-medium">{{ _('del_warning') }}</p>
         </div>
 
         <form action="/ui/delete-user" method="POST" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Оберіть акаунт для
-                    видалення</label>
+                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">{{ _('del_select_acc')
+                    }}</label>
                 <div class="relative group">
                     <select name="username" id="username" required
                         class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none appearance-none cursor-pointer text-slate-700 font-medium group-hover:bg-white group-hover:border-slate-300">
                         <option value="" disabled {% if not user and not request.query_params.get('user') %}selected{%
-                            endif %}>Оберіть користувача...</option>
+                            endif %}>{{ _('login_choose_user') }}</option>
                         {% for u in users %}
                         <option value="{{ u }}" {% if u==user or u==request.query_params.get('user') %}selected{% endif
                             %}>
@@ -66,8 +65,8 @@
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Підтвердіть вашим
-                    паролем</label>
+                <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">{{
+                    _('del_confirm_with_pass') }}</label>
                 <div class="relative">
                     <input type="password" name="password" id="password" required
                         class="block w-full px-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none"
@@ -91,16 +90,16 @@
             </div>
 
             <div>
-                <label for="confirm_delete" class="block text-sm font-semibold text-slate-700 mb-2">Напишіть слово <span
-                        class="text-rose-600">DELETE</span> для підтвердження</label>
+                <label for="confirm_delete" class="block text-sm font-semibold text-slate-700 mb-2">{{
+                    _('del_type_delete') }} <span class="text-rose-600">DELETE</span></label>
                 <input type="text" name="confirm_delete" id="confirm_delete" required
                     class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent transition-all outline-none font-bold placeholder:font-normal"
-                    placeholder="Введіть DELETE">
+                    placeholder="{{ _('del_placeholder') }}">
             </div>
 
             <button type="submit"
                 class="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-lg hover:bg-rose-700 transition-all active:scale-95 shadow-lg shadow-rose-600/30">
-                Видалити безповоротно
+                {{ _('del_btn_submit') }}
             </button>
         </form>
     </div>

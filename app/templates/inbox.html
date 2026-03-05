@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Вхідні - Mail Service API{% endblock %}
+{% block title %}{{ _('inbox_title') }} - Mail Service API{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
@@ -14,7 +14,7 @@
                     {{ user.username[0] | upper }}
                 </div>
                 <div class="overflow-hidden">
-                    <p class="text-xs text-slate-500 font-medium">Акаунт</p>
+                    <p class="text-xs text-slate-500 font-medium">{{ _('inbox_account') }}</p>
                     <p class="text-sm font-bold text-slate-800 truncate"
                         title="{{ user.username }}@{{ os.getenv('DOMAIN', 'localhost') }}">{{ user.username }}@{{
                         os.getenv('DOMAIN', 'localhost') }}</p>
@@ -23,7 +23,7 @@
             <form action="/ui/logout" method="POST" class="ml-2">
                 <button type="submit"
                     class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                    title="Вийти">
+                    title="{{ _('inbox_logout') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
@@ -38,7 +38,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            Написати
+            {{ _('inbox_compose') }}
         </a>
         <nav class="space-y-1">
             <a href="/ui/inbox?folder=INBOX"
@@ -48,7 +48,7 @@
                         d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                     </path>
                 </svg>
-                Вхідні
+                {{ _('inbox_folder_inbox') }}
                 <span class="ml-auto text-xs py-0.5 px-2 bg-brand-100 rounded-full">{{ counts.INBOX if counts else 0
                     }}</span>
             </a>
@@ -58,7 +58,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
-                Відправлені
+                {{ _('inbox_folder_sent') }}
                 <span class="ml-auto text-xs py-0.5 px-2 bg-slate-100 rounded-full">{{ counts.Sent if counts else 0
                     }}</span>
             </a>
@@ -69,7 +69,7 @@
                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                     </path>
                 </svg>
-                Кошик
+                {{ _('inbox_folder_trash') }}
                 <span class="ml-auto text-xs py-0.5 px-2 bg-slate-100 rounded-full">{{ counts.Trash if counts else 0
                     }}</span>
             </a>
@@ -82,14 +82,15 @@
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                 <h2 class="font-bold text-slate-800 flex items-center">
                     <span class="w-2 h-2 rounded-full bg-brand-600 mr-2"></span>
-                    {% if current_folder == 'INBOX' %}Вхідні{% elif current_folder == 'Sent' %}Відправлені{% elif
-                    current_folder == 'Trash' %}Кошик{% else %}{{ current_folder }}{% endif %}
+                    {% if current_folder == 'INBOX' %}{{ _('inbox_folder_inbox') }}{% elif current_folder == 'Sent' %}{{
+                    _('inbox_folder_sent') }}{% elif
+                    current_folder == 'Trash' %}{{ _('inbox_folder_trash') }}{% else %}{{ current_folder }}{% endif %}
                 </h2>
                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     {% if total_pages > 0 %}
-                    Сторінка {{ current_page }} з {{ total_pages }}
+                    {{ _('inbox_page') }} {{ current_page }} {{ _('inbox_of') }} {{ total_pages }}
                     {% else %}
-                    Немає листів
+                    {{ _('inbox_no_mails') }}
                     {% endif %}
                 </span>
             </div>
@@ -106,20 +107,20 @@
                     <div class="flex-grow overflow-hidden">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-bold text-slate-800 text-sm truncate">{{ mail.sender }}</span>
-                            <span class="text-xs text-slate-400">{{ mail.date or 'Щойно' }}</span>
+                            <span class="text-xs text-slate-400">{{ mail.date or _('inbox_just_now') }}</span>
                         </div>
-                        <h4 class="text-sm font-semibold text-slate-900 truncate">{{ mail.subject or '(без теми)' }}
+                        <h4 class="text-sm font-semibold text-slate-900 truncate">{{ mail.subject or
+                            _('inbox_no_subject') }}
                         </h4>
-                        <p class="text-xs text-slate-500 line-clamp-1 mt-1">{{ mail.snippet or 'Перегляньте вміст
-                            листа...' }}</p>
+                        <p class="text-xs text-slate-500 line-clamp-1 mt-1">{{ mail.snippet or _('inbox_preview') }}</p>
                     </div>
                     {% if current_folder == 'Trash' %}
                     <div class="flex space-x-2 ml-4 self-center">
                         <form action="/ui/mail/{{ mail.uid }}/restore" method="POST"
-                            onsubmit="return confirm('Ви точно впевнені, що хочете відновити цей лист?')">
+                            onsubmit="return confirm('{{ _('inbox_confirm_restore') }}')">
                             <button type="submit"
                                 class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                title="Відновити">
+                                title="{{ _('inbox_restore_btn') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
@@ -127,10 +128,10 @@
                             </button>
                         </form>
                         <form action="/ui/mail/{{ mail.uid }}/permanent-delete" method="POST"
-                            onsubmit="return confirm('Ви точно впевнені, що хочете остаточно видалити цей лист? Відновити його буде неможливо.')">
+                            onsubmit="return confirm('{{ _('inbox_confirm_perm_delete') }}')">
                             <button type="submit"
                                 class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                title="Остаточно видалити">
+                                title="{{ _('inbox_perm_delete_btn') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -160,7 +161,7 @@
                             </path>
                         </svg>
                     </div>
-                    <p class="text-slate-400 font-medium">Ваша скринька порожня</p>
+                    <p class="text-slate-400 font-medium">{{ _('inbox_empty') }}</p>
                 </div>
                 {% endif %}
             </div>
@@ -168,23 +169,27 @@
             <!-- Pagination -->
             {% if total_pages > 1 or current_page > 1 %}
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between">
-                <p class="text-sm text-slate-500">Сторінка {{ current_page }} з {{ total_pages }}</p>
+                <p class="text-sm text-slate-500">{{ _('inbox_page') }} {{ current_page }} {{ _('inbox_of') }} {{
+                    total_pages }}</p>
                 <div class="flex space-x-2">
                     {% if current_page > 1 %}
                     <a href="/ui/inbox?folder={{ current_folder }}&page={{ current_page - 1 }}"
-                        class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Попередня</a>
+                        class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">{{
+                        _('inbox_prev') }}</a>
                     {% else %}
                     <span
-                        class="px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed">Попередня</span>
+                        class="px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed">{{
+                        _('inbox_prev') }}</span>
                     {% endif %}
 
                     {% if current_page < total_pages %} <a
                         href="/ui/inbox?folder={{ current_folder }}&page={{ current_page + 1 }}"
                         class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-                        Наступна</a>
+                        {{ _('inbox_next') }}</a>
                         {% else %}
                         <span
-                            class="px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed">Наступна</span>
+                            class="px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed">{{
+                            _('inbox_next') }}</span>
                         {% endif %}
                 </div>
             </div>

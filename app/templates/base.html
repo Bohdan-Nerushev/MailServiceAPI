@@ -97,16 +97,49 @@
                             class="text-brand-600">API</span></a>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="/docs"
-                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Swagger
-                        API</a>
+                    <!-- Language Selector -->
+                    <div class="relative" x-data="{ openLang: false }" @click.away="openLang = false">
+                        <button @click="openLang = !openLang"
+                            class="flex items-center text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">
+                            <span class="mr-1.5 text-base">
+                                {% if current_lang == 'en' %}🇬🇧{% elif current_lang == 'de' %}🇩🇪{% else %}🇺🇦{%
+                                endif %}
+                            </span>
+                            {{ _('nav_language') }}
+                            <svg class="w-4 h-4 ml-1 transition-transform" :class="{'rotate-180': openLang}" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div x-show="openLang" x-transition x-cloak
+                            class="absolute right-0 mt-3 w-48 bg-white border border-slate-100 rounded-xl shadow-xl py-2 z-50">
+                            <a href="#" onclick="changeLang('en'); return false;"
+                                class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors"><span
+                                    class="text-base">🇬🇧</span><span class="ml-3 font-medium">{{ _('lang_en')
+                                    }}</span></a>
+                            <a href="#" onclick="changeLang('de'); return false;"
+                                class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors"><span
+                                    class="text-base">🇩🇪</span><span class="ml-3 font-medium">{{ _('lang_de')
+                                    }}</span></a>
+                            <a href="#" onclick="changeLang('uk'); return false;"
+                                class="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-600 transition-colors"><span
+                                    class="text-base">🇺🇦</span><span class="ml-3 font-medium">{{ _('lang_uk')
+                                    }}</span></a>
+                        </div>
+                    </div>
+
+                    <a href="/docs" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">{{
+                        _('nav_swagger_api') }}</a>
                     <a href="/ui/health"
-                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Стан
-                        системи</a>
+                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">{{
+                        _('nav_system_health') }}</a>
                     <a href="/ui/users"
-                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">Користувачі</a>
+                        class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors">{{
+                        _('nav_users') }}</a>
                     <a href="/ui/login"
-                        class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all shadow-md shadow-brand-600/20 active:scale-95">Вхід</a>
+                        class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all shadow-md shadow-brand-600/20 active:scale-95">{{
+                        _('nav_login') }}</a>
                 </div>
             </div>
         </div>
@@ -114,14 +147,15 @@
 
     <!-- Main Content -->
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-fade-in">
-        {% if error %}
+        {% if error_key or error %}
         <div
             class="mb-8 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center text-rose-700 animate-slide-up">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span class="text-sm font-semibold">{{ error }}</span>
+            <span class="text-sm font-semibold">{% if error_key %}{{ _(error_key) }}{% if error_detail %}: {{
+                error_detail }}{% endif %}{% else %}{{ error }}{% endif %}</span>
         </div>
         {% endif %}
 
@@ -150,6 +184,12 @@
                 eyeIcon.classList.remove('hidden');
                 eyeOffIcon.classList.add('hidden');
             }
+        }
+
+        function changeLang(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
         }
     </script>
     {% block scripts %}{% endblock %}

@@ -12,7 +12,7 @@
                 </path>
             </svg>
         </a>
-        <h1 class="text-3xl font-bold font-outfit text-slate-900">Новий користувач</h1>
+        <h1 class="text-3xl font-bold font-outfit text-slate-900">{{ _('reg_title') }}</h1>
     </div>
 
     <!-- Feedback Alerts -->
@@ -22,7 +22,7 @@
         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span class="font-bold">{{ success_msg }}</span>
+        <span class="font-bold">{% if success_key %}{% set _tpl = _(success_key) %}{% if success_args %}{{ _tpl.format(**success_args) }}{% else %}{{ _tpl }}{% endif %}{% elif success_msg %}{{ success_msg }}{% endif %}</span>
     </div>
     <script>
         setTimeout(() => { window.location.href = "/ui/users"; }, 3000);
@@ -32,7 +32,7 @@
     <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 animate-slide-up">
         <form action="/ui/register" method="POST" class="space-y-6">
             <div>
-                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">Ім'я користувача</label>
+                <label for="username" class="block text-sm font-semibold text-slate-700 mb-2">{{ _('reg_username') }}</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">Пароль</label>
+                <label for="password" class="block text-sm font-semibold text-slate-700 mb-2">{{ _('reg_password') }}</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,8 +78,7 @@
             </div>
 
             <div>
-                <label for="confirm_password" class="block text-sm font-semibold text-slate-700 mb-2">Підтвердіть
-                    пароль</label>
+                <label for="confirm_password" class="block text-sm font-semibold text-slate-700 mb-2">{{ _('reg_confirm') }}</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +110,7 @@
 
             <button type="submit"
                 class="w-full py-4 bg-brand-600 text-white rounded-2xl font-bold text-lg hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 transition-all active:scale-95">
-                Створити акаунт
+                {{ _('reg_submit') }}
             </button>
         </form>
     </div>
@@ -124,9 +123,8 @@
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-                <h4 class="text-sm font-bold text-brand-900">Важливо</h4>
-                <p class="text-sm text-brand-700 mt-1">Ця дія також створить домашню директорію користувача в системі
-                    Linux для зберігання пошти.</p>
+                <h4 class="text-sm font-bold text-brand-900">{{ _('reg_important') }}</h4>
+                <p class="text-sm text-brand-700 mt-1">{{ _('reg_info') }}</p>
             </div>
         </div>
     </div>

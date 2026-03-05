@@ -24,7 +24,7 @@ def fetch_emails(username, password, folder='INBOX', limit=10, offset=0):
                     "uid": msg.uid,
                     "sender": msg.from_ if msg.from_ else "Unknown",
                     "subject": msg.subject if msg.subject else "(No Subject)",
-                    "date": str(msg.date.strftime("%d %b, %H:%M")),
+                    "date": str(msg.date.strftime("%d %b, %H:%M")) if getattr(msg, 'date', None) else "Невідомо",
                     "text": msg.text,
                     "snippet": msg.text[:100] if msg.text else "",
                     "seen": msg.flags
@@ -106,27 +106,34 @@ from email.message import EmailMessage
 from imap_tools import MailMessageFlags
 
 def append_to_sent(username, password, to_email, subject, body):
-    """Зберігає надісланий лист у папці Sent."""
+    """Saves a sent email to the Sent folder via IMAP APPEND."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     domain = os.getenv("DOMAIN", "localhost")
     from_email = f"{username}@{domain}"
-    
+
     try:
         with MailBox(imap_server).login(username, password) as mailbox:
-            # Створюємо папку Sent, якщо її ще немає
-            if 'Sent' not in [f.name for f in mailbox.folder.list()]:
-                 mailbox.folder.create('Sent')
-            
-            # Формуємо MIME-повідомлення
+            folder_names = [f.name for f in mailbox.folder.list()]
+            if 'Sent' not in folder_names:
+                mailbox.folder.create('Sent')
+
+            import email.utils
             msg = EmailMessage()
             msg['Subject'] = subject
             msg['From'] = from_email
             msg['To'] = to_email
+            msg['Date'] = email.utils.formatdate(localtime=True)
+            msg['Message-ID'] = email.utils.make_msgid(domain=domain)
             msg.set_content(body)
-            
-            # Додаємо у папку Sent як прочитаний лист
-            mailbox.append(msg.as_bytes(), 'Sent', [MailMessageFlags.SEEN])
-            return True, "Додано в Sent"
+
+            mailbox.append(
+                msg.as_bytes(),
+                folder='Sent',
+                dt=None,
+                flag_set=[MailMessageFlags.SEEN]
+            )
+            logger.info(f"Email appended to Sent folder for user {username}")
+            return True, "Saved to Sent"
     except Exception as e:
-        logger.error(f"Помилка збереження в Sent: {str(e)}")
+        logger.error(f"append_to_sent failed for user {username}: {str(e)}")
         return False, str(e)
