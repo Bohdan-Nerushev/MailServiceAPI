@@ -5,10 +5,10 @@ from app.services import smtp_service, imap_service
 router = APIRouter(prefix="/mail", tags=["E-Mail"])
 
 class EmailSchema(BaseModel):
-    to: str = Field(..., examples=["vosadchuk@vo.lehrwerkstatt"])
+    to: str = Field(..., examples=["recipient@example.com"])
     subject: str = Field(..., examples=["Test-E-Mail"])
     body: str = Field(..., examples=["Dies ist eine Test-Nachricht vom Mail-Service."])
-    from_email: str = Field(None, examples=["bnerushev@bnerushev.lehrwerkstatt"])
+    from_email: str = Field(None, examples=["sender@example.com"])
 
 @router.post("/send")
 async def send_mail(email_data: EmailSchema):

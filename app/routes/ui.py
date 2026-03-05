@@ -16,7 +16,8 @@ templates = Jinja2Templates(directory="app/templates")
 # Add global helpers to templates
 templates.env.globals.update({
     "now": datetime.now,
-    "os": os
+    "os": os,
+    "domain": os.getenv("DOMAIN", "localhost")
 })
 
 # --- Helpers ---
