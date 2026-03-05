@@ -4,7 +4,9 @@ from imap_tools import MailBox, AND
 
 logger = logging.getLogger(__name__)
 
-def fetch_emails(username, password, folder='INBOX', limit=10):
+import itertools
+
+def fetch_emails(username, password, folder='INBOX', limit=10, offset=0):
     """Отримує список листів з вказаної папки з лімітом."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
 
@@ -17,7 +19,7 @@ def fetch_emails(username, password, folder='INBOX', limit=10):
             
             mailbox.folder.set(folder)
             messages = []
-            for msg in mailbox.fetch(limit=limit, reverse=True):
+            for msg in itertools.islice(mailbox.fetch(reverse=True), offset, offset + limit):
                 messages.append({
                     "uid": msg.uid,
                     "sender": msg.from_ if msg.from_ else "Unknown",
@@ -98,4 +100,33 @@ def fetch_folder_counts(username, password):
             return True, counts
     except Exception as e:
         logger.error(f"Помилка отримання лічильників: {str(e)}")
+        return False, str(e)
+
+from email.message import EmailMessage
+from imap_tools import MailMessageFlags
+
+def append_to_sent(username, password, to_email, subject, body):
+    """Зберігає надісланий лист у папці Sent."""
+    imap_server = os.getenv("IMAP_SERVER", "localhost")
+    domain = os.getenv("DOMAIN", "localhost")
+    from_email = f"{username}@{domain}"
+    
+    try:
+        with MailBox(imap_server).login(username, password) as mailbox:
+            # Створюємо папку Sent, якщо її ще немає
+            if 'Sent' not in [f.name for f in mailbox.folder.list()]:
+                 mailbox.folder.create('Sent')
+            
+            # Формуємо MIME-повідомлення
+            msg = EmailMessage()
+            msg['Subject'] = subject
+            msg['From'] = from_email
+            msg['To'] = to_email
+            msg.set_content(body)
+            
+            # Додаємо у папку Sent як прочитаний лист
+            mailbox.append(msg.as_bytes(), 'Sent', [MailMessageFlags.SEEN])
+            return True, "Додано в Sent"
+    except Exception as e:
+        logger.error(f"Помилка збереження в Sent: {str(e)}")
         return False, str(e)

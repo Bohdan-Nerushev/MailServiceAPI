@@ -29,6 +29,29 @@
             Назад до списку
         </a>
         <div class="flex space-x-3">
+            {% if current_folder == 'Trash' %}
+            <form action="/ui/mail/{{ mail.uid }}/restore" method="POST"
+                onsubmit="return confirm('Ви точно впевнені, що хочете відновити цей лист?')">
+                <button type="submit" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors"
+                    title="Відновити">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                    </svg>
+                </button>
+            </form>
+            <form action="/ui/mail/{{ mail.uid }}/permanent-delete" method="POST"
+                onsubmit="return confirm('Ви точно впевнені, що хочете остаточно видалити цей лист? Відновити його буде неможливо.')">
+                <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                    title="Остаточно видалити">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                </button>
+            </form>
+            {% else %}
             <form action="/ui/mail/{{ mail.uid }}/delete?folder={{ current_folder or 'INBOX' }}" method="POST"
                 onsubmit="return confirm('Ви впевнені, що хочете видалити цей лист у кошик?')">
                 <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
@@ -40,6 +63,7 @@
                     </svg>
                 </button>
             </form>
+            {% endif %}
         </div>
     </div>
 

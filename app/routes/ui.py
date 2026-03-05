@@ -88,19 +88,26 @@ async def delete_user_page(request: Request):
     return templates.TemplateResponse("delete_user.html", {"request": request, "users": usernames})
 
 @router.get("/inbox", response_class=HTMLResponse)
-async def inbox_page(request: Request, folder: str = "INBOX", error: str = None):
+async def inbox_page(request: Request, folder: str = "INBOX", error: str = None, page: int = 1):
     user = get_session_user(request)
     if not user:
         return RedirectResponse(url="/ui/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    limit = 10
+    offset = (page - 1) * limit
     
     success, mails = imap_service.fetch_emails(
         user["username"], 
         user["password"], 
         folder=folder, 
-        limit=10
+        limit=limit,
+        offset=offset
     )
     # Отримуємо лічильники для бокової панелі
     _, counts = imap_service.fetch_folder_counts(user["username"], user["password"])
+    
+    total_emails = counts.get(folder, 0) if counts else 0
+    total_pages = (total_emails + limit - 1) // limit if total_emails > 0 else 1
     
     if not success:
         # Fetch users again for the login page re-render if it's a login error
@@ -118,7 +125,9 @@ async def inbox_page(request: Request, folder: str = "INBOX", error: str = None)
         "user": user, 
         "current_folder": folder,
         "error": error,
-        "counts": counts
+        "counts": counts,
+        "current_page": page,
+        "total_pages": total_pages
     })
 
 @router.get("/compose", response_class=HTMLResponse)
@@ -322,6 +331,7 @@ async def handle_send_mail(
     )
     
     if success:
+        imap_service.append_to_sent(user["username"], user["password"], to, subject, body)
         return templates.TemplateResponse("compose.html", {
             "request": request,
             "success_msg": "Лист успішно надіслано! Повернення до вхідних...",
