@@ -5,13 +5,24 @@ from imap_tools import MailBox, AND
 logger = logging.getLogger(__name__)
 
 import itertools
+import ssl
+
+def get_mailbox(hostname):
+    """Отримує налаштований об'єкт MailBox з можливістю відключення перевірки SSL."""
+    validate_certs = os.getenv("MAIL_VALIDATE_CERTS", "False").lower() == "true"
+    if not validate_certs:
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        return MailBox(hostname, ssl_context=context)
+    return MailBox(hostname)
 
 def fetch_emails(username, password, folder='INBOX', limit=10, offset=0):
     """Отримує список листів з вказаної папки з лімітом."""
     imap_server = os.getenv("IMAP_SERVER", "localhost")
 
     try:
-        with MailBox(imap_server).login(username, password) as mailbox:
+        with get_mailbox(imap_server).login(username, password) as mailbox:
             # Перевіряємо наявність папки
             if folder not in [f.name for f in mailbox.folder.list()]:
                 logger.warning(f"Folder {folder} does not exist for user {username}. Returning empty list.")
@@ -41,7 +52,7 @@ def fetch_message_by_uid(username, password, uid, folder='INBOX'):
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     
     try:
-        with MailBox(imap_server).login(username, password, folder) as mailbox:
+        with get_mailbox(imap_server).login(username, password, folder) as mailbox:
             # Suchen Sie den Brief anhand seiner UID
             for msg in mailbox.fetch(AND(uid=uid)):
                 return True, {
@@ -63,7 +74,7 @@ def delete_permanent(username, password, uid, folder='INBOX'):
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     
     try:
-        with MailBox(imap_server).login(username, password, folder) as mailbox:
+        with get_mailbox(imap_server).login(username, password, folder) as mailbox:
             mailbox.delete(uid)
             return True, f"Лист {uid} видалено назавжди з {folder}"
     except Exception as e:
@@ -75,7 +86,7 @@ def move_message(username, password, uid, source_folder, target_folder):
     imap_server = os.getenv("IMAP_SERVER", "localhost")
     
     try:
-        with MailBox(imap_server).login(username, password, source_folder) as mailbox:
+        with get_mailbox(imap_server).login(username, password, source_folder) as mailbox:
             # Створюємо цільову папку, якщо вона не існує
             if target_folder not in [f.name for f in mailbox.folder.list()]:
                  mailbox.folder.create(target_folder)
@@ -91,7 +102,7 @@ def fetch_folder_counts(username, password):
     counts = {"INBOX": 0, "Sent": 0, "Trash": 0}
     
     try:
-        with MailBox(imap_server).login(username, password) as mailbox:
+        with get_mailbox(imap_server).login(username, password) as mailbox:
             folders = [f.name for f in mailbox.folder.list()]
             for folder in counts.keys():
                 if folder in folders:
@@ -112,7 +123,7 @@ def append_to_sent(username, password, to_email, subject, body):
     from_email = f"{username}@{domain}"
 
     try:
-        with MailBox(imap_server).login(username, password) as mailbox:
+        with get_mailbox(imap_server).login(username, password) as mailbox:
             folder_names = [f.name for f in mailbox.folder.list()]
             if 'Sent' not in folder_names:
                 mailbox.folder.create('Sent')
