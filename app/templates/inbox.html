@@ -20,7 +20,7 @@
                         os.getenv('DOMAIN', 'localhost') }}</p>
                 </div>
             </div>
-            <form action="/ui/logout" method="POST" class="ml-2">
+            <form action="/ui/logout?user={{ user.username }}" method="POST" class="ml-2">
                 <button type="submit"
                     class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                     title="{{ _('inbox_logout') }}">
@@ -33,7 +33,7 @@
             </form>
         </div>
 
-        <a href="/ui/compose"
+        <a href="/ui/compose?user={{ user.username }}"
             class="w-full py-4 bg-brand-600 text-white rounded-2xl font-bold flex items-center justify-center shadow-lg hover:shadow-brand-600/30 mb-8 transition-all active:scale-95">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -41,7 +41,7 @@
             {{ _('inbox_compose') }}
         </a>
         <nav class="space-y-1">
-            <a href="/ui/inbox?folder=INBOX"
+            <a href="/ui/inbox?folder=INBOX&user={{ user.username }}"
                 class="flex items-center px-4 py-3 {% if current_folder == 'INBOX' %}bg-brand-50 text-brand-700 font-bold{% else %}text-slate-600 hover:bg-slate-100{% endif %} rounded-xl transition-all">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +52,7 @@
                 <span class="ml-auto text-xs py-0.5 px-2 bg-brand-100 rounded-full">{{ counts.INBOX if counts else 0
                     }}</span>
             </a>
-            <a href="/ui/inbox?folder=Sent"
+            <a href="/ui/inbox?folder=Sent&user={{ user.username }}"
                 class="flex items-center px-4 py-3 {% if current_folder == 'Sent' %}bg-brand-50 text-brand-700 font-bold{% else %}text-slate-600 hover:bg-slate-100{% endif %} rounded-xl transition-all">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -62,7 +62,7 @@
                 <span class="ml-auto text-xs py-0.5 px-2 bg-slate-100 rounded-full">{{ counts.Sent if counts else 0
                     }}</span>
             </a>
-            <a href="/ui/inbox?folder=Trash"
+            <a href="/ui/inbox?folder=Trash&user={{ user.username }}"
                 class="flex items-center px-4 py-3 {% if current_folder == 'Trash' %}bg-brand-50 text-brand-700 font-bold{% else %}text-slate-600 hover:bg-slate-100{% endif %} rounded-xl transition-all">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -98,7 +98,7 @@
             <div class="divide-y divide-slate-50">
                 {% if mails %}
                 {% for mail in mails %}
-                <a href="/ui/mail/{{ mail.uid }}?folder={{ current_folder }}"
+                <a href="/ui/mail/{{ mail.uid }}?folder={{ current_folder }}&user={{ user.username }}"
                     class="flex items-start px-6 py-5 hover:bg-slate-50/80 transition-all group border-l-4 border-transparent hover:border-brand-600">
                     <div
                         class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 mr-4 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">
@@ -116,7 +116,7 @@
                     </div>
                     {% if current_folder == 'Trash' %}
                     <div class="flex space-x-2 ml-4 self-center">
-                        <form action="/ui/mail/{{ mail.uid }}/restore" method="POST"
+                        <form action="/ui/mail/{{ mail.uid }}/restore?user={{ user.username }}" method="POST"
                             onsubmit="return confirm('{{ _('inbox_confirm_restore') }}')">
                             <button type="submit"
                                 class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
@@ -127,7 +127,7 @@
                                 </svg>
                             </button>
                         </form>
-                        <form action="/ui/mail/{{ mail.uid }}/permanent-delete" method="POST"
+                        <form action="/ui/mail/{{ mail.uid }}/permanent-delete?user={{ user.username }}" method="POST"
                             onsubmit="return confirm('{{ _('inbox_confirm_perm_delete') }}')">
                             <button type="submit"
                                 class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
@@ -173,7 +173,7 @@
                     total_pages }}</p>
                 <div class="flex space-x-2">
                     {% if current_page > 1 %}
-                    <a href="/ui/inbox?folder={{ current_folder }}&page={{ current_page - 1 }}"
+                    <a href="/ui/inbox?folder={{ current_folder }}&page={{ current_page - 1 }}&user={{ user.username }}"
                         class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">{{
                         _('inbox_prev') }}</a>
                     {% else %}
@@ -183,7 +183,7 @@
                     {% endif %}
 
                     {% if current_page < total_pages %} <a
-                        href="/ui/inbox?folder={{ current_folder }}&page={{ current_page + 1 }}"
+                        href="/ui/inbox?folder={{ current_folder }}&page={{ current_page + 1 }}&user={{ user.username }}"
                         class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                         {{ _('inbox_next') }}</a>
                         {% else %}

@@ -5,6 +5,8 @@ from app.services import user_manager, imap_service, system_service, smtp_servic
 from datetime import datetime
 import os
 import logging
+import json
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +45,40 @@ def render_template(name: str, context: dict, status_code: int = 200, headers: d
         
     return response
 
+def get_all_sessions(request: Request) -> dict:
+    sessions_str = request.cookies.get("mail_sessions")
+    if not sessions_str:
+        username = request.cookies.get("mail_user")
+        password = request.cookies.get("mail_pass")
+        if username and password:
+            return {username: password}
+        return {}
+    try:
+        return json.loads(base64.b64decode(sessions_str).decode('utf-8'))
+    except Exception:
+        return {}
+
+def set_sessions_cookie(response, sessions: dict):
+    encoded = base64.b64encode(json.dumps(sessions).encode('utf-8')).decode('utf-8')
+    response.set_cookie(key="mail_sessions", value=encoded, httponly=True)
+    response.delete_cookie("mail_user")
+    response.delete_cookie("mail_pass")
+
 def get_session_user(request: Request):
-    """Retrieve username and password from cookies (Simple PoC session)."""
-    username = request.cookies.get("mail_user")
-    password = request.cookies.get("mail_pass")
-    if not username or not password:
+    """Retrieve user and password from sessions with support for multiple accounts."""
+    sessions = get_all_sessions(request)
+    if not sessions:
         return None
-    return {"username": username, "password": password}
+        
+    requested_user = request.query_params.get("user")
+    if requested_user:
+        if requested_user in sessions:
+            return {"username": requested_user, "password": sessions[requested_user]}
+        else:
+            return None
+        
+    first_user = list(sessions.keys())[0]
+    return {"username": first_user, "password": sessions[first_user]}
 
 # --- GET Routes (Pages) ---
 
@@ -63,10 +92,8 @@ async def register_page(request: Request):
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: str = None):
-    user = get_session_user(request)
-    if user and not error:
-        return RedirectResponse(url="/ui/inbox", status_code=status.HTTP_303_SEE_OTHER)
-        
+    # Retrieve user just to check if we wanted to auto-redirect, but we allow multiple accounts now.
+    # You can bookmark /ui/inbox. If they hit /ui/login, assume they want to add/change account.
     _, user_details = user_manager.list_system_users()
     usernames = [u["username"] for u in user_details] if isinstance(user_details, list) else []
     return render_template("login.html", {"request": request, "error": error, "users": usernames})
@@ -223,10 +250,11 @@ async def handle_register(
 async def handle_login(request: Request, username: str = Form(...), password: str = Form(...)):
     # Verify via system manager
     if user_manager.verify_user_password(username, password):
-        # Successful login - Store in cookies for now
-        response = RedirectResponse(url="/ui/inbox", status_code=status.HTTP_303_SEE_OTHER)
-        response.set_cookie(key="mail_user", value=username, httponly=True)
-        response.set_cookie(key="mail_pass", value=password, httponly=True)
+        sessions = get_all_sessions(request)
+        sessions[username] = password
+        
+        response = RedirectResponse(url=f"/ui/inbox?user={username}", status_code=status.HTTP_303_SEE_OTHER)
+        set_sessions_cookie(response, sessions)
         return response
     
     # Fetch users for re-rendering the login page
@@ -240,10 +268,24 @@ async def handle_login(request: Request, username: str = Form(...), password: st
     })
 
 @router.post("/logout")
-async def handle_logout():
+async def handle_logout(request: Request):
+    sessions = get_all_sessions(request)
+    user_to_logout = request.query_params.get("user")
+    
+    if user_to_logout and user_to_logout in sessions:
+        del sessions[user_to_logout]
+    else:
+        sessions = {}
+
     response = RedirectResponse(url="/ui/", status_code=status.HTTP_303_SEE_OTHER)
-    response.delete_cookie("mail_user")
-    response.delete_cookie("mail_pass")
+
+    if not sessions:
+        response.delete_cookie("mail_sessions")
+        response.delete_cookie("mail_user")
+        response.delete_cookie("mail_pass")
+    else:
+        set_sessions_cookie(response, sessions)
+        
     return response
 
 @router.post("/change-password")
@@ -361,7 +403,8 @@ async def handle_send_mail(
         return render_template("compose.html", {
             "request": request,
             "success_msg": True,
-            "recipient": to
+            "recipient": to,
+            "user": user
         })
 
     return render_template("compose.html", {
@@ -369,7 +412,8 @@ async def handle_send_mail(
         "error": msg,
         "recipient": to,
         "subject": subject,
-        "body": body
+        "body": body,
+        "user": user
     })
 @router.post("/mail/{uid}/delete")
 async def handle_delete_mail(request: Request, uid: str, folder: str = "INBOX"):
@@ -387,10 +431,10 @@ async def handle_delete_mail(request: Request, uid: str, folder: str = "INBOX"):
             "mail": {"uid": uid},
             "user": user,
             "current_folder": folder,
-            "redirect_url": f"/ui/inbox?folder={folder}"
+            "redirect_url": f"/ui/inbox?folder={folder}&user={user['username']}"
         })
     
-    return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={msg}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/ui/inbox?folder={folder}&error={msg}&user={user['username']}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/mail/{uid}/restore")
 async def handle_restore_mail(request: Request, uid: str):
@@ -400,7 +444,7 @@ async def handle_restore_mail(request: Request, uid: str):
     
     # Restore from Trash to INBOX
     success, msg = imap_service.move_message(user["username"], user["password"], uid, "Trash", "INBOX")
-    return RedirectResponse(url="/ui/inbox?folder=Trash", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/ui/inbox?folder=Trash&user={user['username']}", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/mail/{uid}/permanent-delete")
 async def handle_permanent_delete_mail(request: Request, uid: str):
@@ -410,4 +454,4 @@ async def handle_permanent_delete_mail(request: Request, uid: str):
     
     # Final deletion from Trash
     success, msg = imap_service.delete_permanent(user["username"], user["password"], uid, "Trash")
-    return RedirectResponse(url="/ui/inbox?folder=Trash", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/ui/inbox?folder=Trash&user={user['username']}", status_code=status.HTTP_303_SEE_OTHER)

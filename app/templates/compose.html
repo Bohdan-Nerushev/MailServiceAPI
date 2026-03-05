@@ -5,7 +5,8 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="mb-8 flex items-center">
-        <a href="/ui/inbox" class="text-slate-400 hover:text-brand-600 transition-colors mr-4 group">
+        <a href="/ui/inbox?user={{ user.username }}"
+            class="text-slate-400 hover:text-brand-600 transition-colors mr-4 group">
             <svg class="w-6 h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
@@ -24,7 +25,7 @@
         <span class="font-bold">{{ _('compose_success') }}</span>
     </div>
     <script>
-        setTimeout(() => { window.location.href = "/ui/inbox"; }, 3000);
+        setTimeout(() => { window.location.href = "/ui/inbox?user={{ user.username }}"; }, 3000);
     </script>
     {% endif %}
 
@@ -39,7 +40,7 @@
     {% endif %}
 
     <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 animate-slide-up">
-        <form action="/ui/compose" method="POST" class="space-y-6">
+        <form action="/ui/compose?user={{ user.username }}" method="POST" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="to" class="block text-sm font-semibold text-slate-700 mb-2">{{ _('compose_to')

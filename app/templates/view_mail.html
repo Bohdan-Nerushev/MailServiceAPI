@@ -13,12 +13,12 @@
         <span class="font-bold">{{ _('view_mail_moved_to_trash') }}</span>
     </div>
     <script>
-        setTimeout(() => { window.location.href = "{{ redirect_url or '/ui/inbox' }}"; }, 3000);
+        setTimeout(() => { window.location.href = "{{ redirect_url or ('/ui/inbox?user=' ~ user.username) }}"; }, 3000);
     </script>
     {% endif %}
 
     <div class="mb-8 flex items-center justify-between">
-        <a href="/ui/inbox?folder={{ current_folder or 'INBOX' }}"
+        <a href="/ui/inbox?folder={{ current_folder or 'INBOX' }}&user={{ user.username }}"
             class="flex items-center text-slate-400 hover:text-brand-600 transition-colors group">
             <svg class="w-6 h-6 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
         </a>
         <div class="flex space-x-3">
             {% if current_folder == 'Trash' %}
-            <form action="/ui/mail/{{ mail.uid }}/restore" method="POST"
+            <form action="/ui/mail/{{ mail.uid }}/restore?user={{ user.username }}" method="POST"
                 onsubmit="return confirm('{{ _('inbox_confirm_restore') }}')">
                 <button type="submit" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors"
                     title="{{ _('inbox_restore_btn') }}">
@@ -39,7 +39,7 @@
                     </svg>
                 </button>
             </form>
-            <form action="/ui/mail/{{ mail.uid }}/permanent-delete" method="POST"
+            <form action="/ui/mail/{{ mail.uid }}/permanent-delete?user={{ user.username }}" method="POST"
                 onsubmit="return confirm('{{ _('inbox_confirm_perm_delete') }}')">
                 <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                     title="{{ _('inbox_perm_delete_btn') }}">
@@ -51,8 +51,9 @@
                 </button>
             </form>
             {% else %}
-            <form action="/ui/mail/{{ mail.uid }}/delete?folder={{ current_folder or 'INBOX' }}" method="POST"
-                onsubmit="return confirm('{{ _('view_mail_confirm_delete') }}')">
+            <form
+                action="/ui/mail/{{ mail.uid }}/delete?folder={{ current_folder or 'INBOX' }}&user={{ user.username }}"
+                method="POST" onsubmit="return confirm('{{ _('view_mail_confirm_delete') }}')">
                 <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                     title="{{ _('view_mail_delete_btn') }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
