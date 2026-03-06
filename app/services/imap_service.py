@@ -1,5 +1,6 @@
 import os
 import logging
+from app.services.time_service import time_service
 from imap_tools import MailBox, AND
 
 logger = logging.getLogger(__name__)
@@ -31,13 +32,13 @@ def fetch_emails(username, password, folder='INBOX', limit=10, offset=0):
             mailbox.folder.set(folder)
             messages = []
             for msg in itertools.islice(mailbox.fetch(reverse=True), offset, offset + limit):
-                # Конвертуємо в локальну таймзону сервера
-                msg_date = msg.date.astimezone(None) if msg.date else None
+                # Конвертуємо в налаштовану таймзону
+                date_str = time_service.to_display_string(msg.date, "%d %b, %H:%M") if msg.date else "Невідомо"
                 messages.append({
                     "uid": msg.uid,
                     "sender": msg.from_ if msg.from_ else "Unknown",
                     "subject": msg.subject if msg.subject else "(No Subject)",
-                    "date": str(msg_date.strftime("%d %b, %H:%M")) if msg_date else "Невідомо",
+                    "date": date_str,
                     "text": msg.text,
                     "snippet": msg.text[:100] if msg.text else "",
                     "seen": msg.flags
@@ -57,13 +58,13 @@ def fetch_message_by_uid(username, password, uid, folder='INBOX'):
         with get_mailbox(imap_server).login(username, password, folder) as mailbox:
             # Suchen Sie den Brief anhand seiner UID
             for msg in mailbox.fetch(AND(uid=uid)):
-                msg_date = msg.date.astimezone(None) if msg.date else None
+                date_str = time_service.to_display_string(msg.date, "%d %b %Y, %H:%M") if msg.date else "Невідомо"
                 return True, {
                     "uid": msg.uid,
                     "sender": msg.from_ if msg.from_ else "Unknown",
                     "to": msg.to,
                     "subject": msg.subject if msg.subject else "(No Subject)",
-                    "date": str(msg_date.strftime("%d %b %Y, %H:%M")) if msg_date else "Невідомо",
+                    "date": date_str,
                     "body": msg.text,
                     "html": msg.html
                 }

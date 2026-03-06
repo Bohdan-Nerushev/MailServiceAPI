@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.services import user_manager, imap_service, system_service, smtp_service
 from datetime import datetime
+from app.services.time_service import time_service
 import os
 import logging
 import json
@@ -15,7 +16,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Add global helpers to templates
 templates.env.globals.update({
-    "now": datetime.now,
+    "now": time_service.now,
     "os": os,
     "domain": os.getenv("DOMAIN", "localhost")
 })
