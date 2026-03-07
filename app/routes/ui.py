@@ -397,7 +397,9 @@ async def handle_send_mail(
         to_email=to,
         subject=subject,
         body=body,
-        from_email=f"{user['username']}@{domain}"
+        from_email=f"{user['username']}@{domain}",
+        auth_user=user["username"],
+        auth_pass=user["password"]
     )
     
     if success:

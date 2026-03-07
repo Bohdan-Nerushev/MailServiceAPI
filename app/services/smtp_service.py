@@ -6,7 +6,7 @@ import aiosmtplib
 
 logger = logging.getLogger(__name__)
 
-async def send_email(to_email: str, subject: str, body: str, from_email: str = None):
+async def send_email(to_email: str, subject: str, body: str, from_email: str = None, auth_user: str = None, auth_pass: str = None):
     """Send an email through an asynchronous SMTP client."""
     
     # Erstellen Sie ein E-Mail-Objekt
@@ -19,8 +19,8 @@ async def send_email(to_email: str, subject: str, body: str, from_email: str = N
     # Parameter des Servers aus .env
     hostname = os.getenv("SMTP_SERVER", "localhost")
     port = int(os.getenv("SMTP_PORT", 587))
-    username = os.getenv("SMTP_USER")
-    password = os.getenv("SMTP_PASSWORD")
+    username = auth_user or os.getenv("SMTP_USER")
+    password = auth_pass or os.getenv("SMTP_PASSWORD")
     
     # SSL-Validierung deaktivieren, falls MAIL_VALIDATE_CERTS=False
     validate_certs = os.getenv("MAIL_VALIDATE_CERTS", "False").lower() == "true"
