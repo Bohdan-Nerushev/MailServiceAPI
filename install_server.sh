@@ -47,12 +47,14 @@ echo "Checking snap health..."
 && 
 snap list
 
-apt-get install -y curl wget software-properties-common ufw
+apt-get install -y curl wget software-properties-common ufw nginx
 
 ufw allow 22
 ufw allow 25
 ufw allow 587
 ufw allow 143
+ufw allow 80
+ufw allow 443
 ufw allow 8090
 ufw --force enable
 
@@ -231,6 +233,26 @@ userdb {
 }
 EOF
 
+# 12. Налаштування Nginx як Reverse Proxy
+log "Налаштування Nginx..."
+cat <<EOF > /etc/nginx/sites-available/mailservice
+server {
+    listen 80;
+    server_name $DOMAIN_NAME;
+
+    location / {
+        proxy_pass http://127.0.0.1:$APP_PORT;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+
+ln -sf /etc/nginx/sites-available/mailservice /etc/nginx/sites-enabled/mailservice
+rm -f /etc/nginx/sites-enabled/default
+
 # 13. Налаштування Systemd для API Застосунку
 log "Створення systemd сервісу для API..."
 cat <<EOF > /etc/systemd/system/mail-api.service
@@ -254,8 +276,8 @@ EOF
 # 14. Перезапуск сервісів та активація
 log "Перезапуск та активація сервісів..."
 systemctl daemon-reload
-systemctl enable postfix dovecot spamassassin mail-api >> "$LOG_FILE" 2>&1
-systemctl restart postfix dovecot spamassassin mail-api >> "$LOG_FILE" 2>&1
+systemctl enable postfix dovecot spamassassin mail-api nginx >> "$LOG_FILE" 2>&1
+systemctl restart postfix dovecot spamassassin mail-api nginx >> "$LOG_FILE" 2>&1
 
 # 15. Фінальне повідомлення
 IP_ADDRESS=$(hostname -I | awk '{print $1}')
@@ -264,9 +286,11 @@ log "Встановлення успішно завершено!"
 echo "=========================================================================="
 echo "✅ Встановлення та налаштування сервера успішно завершено!"
 echo "=========================================================================="
-echo "Застосунок API доступний за адресою: http://$IP_ADDRESS:$APP_PORT або http://$DOMAIN_NAME:$APP_PORT"
+echo "Застосунок API доступний за адресою: http://$IP_ADDRESS або http://$DOMAIN_NAME"
+echo " (Також доступний напряму для тестів: http://$IP_ADDRESS:$APP_PORT)"
 echo ""
 echo "Служби які зараз працюють:"
+echo "- Nginx (Reverse Proxy на порту 80)"
 echo "- Postfix (SMTP)"
 echo "- Dovecot (IMAP/POP3)"
 echo "- Mail Service API (Gunicorn/Uvicorn)"
