@@ -117,6 +117,7 @@ async def health_page(request: Request):
         "mail_services": {
             "postfix": system_service.get_service_details("postfix"),
             "dovecot": system_service.get_service_details("dovecot"),
+            "nginx": system_service.get_service_details("nginx"),
             "spamd": system_service.get_service_details("spamd"),
         },
         "mail_security": system_service.get_mail_security_status(),

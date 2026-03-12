@@ -140,6 +140,10 @@ def get_service_details(service_name: str) -> dict:
         elif service_name == "dovecot":
             config_res = subprocess.run(["doveconf", "-n"], capture_output=True, text=True)
             details["config"] = [line for line in config_res.stdout.splitlines() if line.strip()]
+        elif service_name == "nginx":
+            # Überprüft die Nginx-Konfigurationssyntax mit sudo, um Permission errors zu vermeiden
+            config_res = run_sudo_command(["nginx", "-t"])
+            details["config_status"] = config_res.stderr.strip() if config_res.stderr else config_res.stdout.strip()
 
     except Exception as e:
         logger.error(f"Fehler beim Abrufen der Details für {service_name}: {str(e)}")

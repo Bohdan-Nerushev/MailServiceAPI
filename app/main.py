@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from prometheus_fastapi_instrumentator import Instrumentator
 # Setup for templates and static files
 templates = Jinja2Templates(directory="app/templates")
 
@@ -48,7 +48,8 @@ app = FastAPI(
     version="0.1.0",
     openapi_tags=tags_metadata
 )
-
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 # Mounting static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -65,11 +66,14 @@ async def health_check():
     
     mail_security = system_service.get_mail_security_status()
     
+    nginx_details = system_service.get_service_details("nginx")
+    
     postfix_active = postfix_details.get("is_active", False)
     dovecot_active = dovecot_details.get("is_active", False)
     spamd_active = mail_security.get("spamassassin", {}).get("is_active", False)
+    nginx_active = nginx_details.get("is_active", False)
     
-    status = "OK" if postfix_active and dovecot_active and spamd_active else "DEGRADED"
+    status = "OK" if postfix_active and dovecot_active and spamd_active and nginx_active else "DEGRADED"
     
     return {
         "status": status,
@@ -77,7 +81,8 @@ async def health_check():
         "mail_services": {
             "postfix": postfix_details,
             "dovecot": dovecot_details,
-            "spamd": mail_security.get("spamassassin")
+            "spamd": mail_security.get("spamassassin"),
+            "nginx": nginx_details
         },
         "mail_security": mail_security,
         "system_info": system_metrics,
