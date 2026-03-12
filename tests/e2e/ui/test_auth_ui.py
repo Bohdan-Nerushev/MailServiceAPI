@@ -165,19 +165,24 @@ def test_ui_registration_validation():
     session = requests.Session()
     username = f"fail_reg_{uuid.uuid4().hex[:6]}"
     
-    resp = session.post(
-        f"{config.BASE_URL}/ui/register",
-        data={
-            "username": username,
-            "password": "Password123",
-            "confirm_password": "MismatchingPassword"
-        },
-        allow_redirects=True,
-        timeout=10
-    )
-    # Очікуємо, що ми залишимось на сторінці реєстрації або побачимо помилку
-    assert "register" in resp.url or "bg-rose-50" in resp.text or "не збігаються" in resp.text.lower()
-    print("  - Перевірка неспівпадіння паролів при реєстрації пройдена")
+    try:
+        resp = session.post(
+            f"{config.BASE_URL}/ui/register",
+            data={
+                "username": username,
+                "password": "Password123",
+                "confirm_password": "MismatchingPassword"
+            },
+            allow_redirects=True,
+            timeout=10
+        )
+        # Очікуємо, що ми залишимось на сторінці реєстрації або побачимо помилку
+        assert "register" in resp.url or "bg-rose-50" in resp.text or "не збігаються" in resp.text.lower()
+        print("  - Перевірка неспівпадіння паролів при реєстрації пройдена")
+    finally:
+        # Про всяк випадок спроба видалення (використовуємо пароль, якщо він випадково встановився)
+        user_helper.delete_user(username, "Password123")
+        # Також може бути, що користувач був створений без пароля або з іншим паролем у разі бага
 
 def test_ui_change_password_invalid():
     """

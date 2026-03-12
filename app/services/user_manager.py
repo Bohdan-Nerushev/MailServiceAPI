@@ -68,7 +68,13 @@ def create_system_user(username: str, password: str):
         return False, msg
     
     # Passwort setzen
-    return change_user_password(username, password)
+    pw_success, pw_msg = change_user_password(username, password)
+    if not pw_success:
+        # Rollback: Delete the user if password setting failed
+        delete_system_user(username)
+        return False, f"User created but password setting failed: {pw_msg}"
+        
+    return True, "User created successfully"
 
 def delete_system_user(username: str):
     """Delete the user and their home directory."""

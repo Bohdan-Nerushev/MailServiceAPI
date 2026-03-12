@@ -94,22 +94,31 @@ def test_create_user_invalid():
     print("Запуск: test_create_user_invalid")
     
     # Порожній пароль
-    resp = requests.post(
-        f"{config.BASE_URL}/users",
-        json={"username": f"invalid_{uuid.uuid4().hex[:6]}", "password": ""},
-        timeout=10
-    )
-    assert resp.status_code in [400, 422]
-    print("  - Валідація порожнього пароля пройдена (порожній пароль)")
+    username1 = f"invalid_{uuid.uuid4().hex[:6]}"
+    try:
+        resp = requests.post(
+            f"{config.BASE_URL}/users",
+            json={"username": username1, "password": ""},
+            timeout=10
+        )
+        assert resp.status_code in [400, 422]
+        print("  - Валідація порожнього пароля пройдена (порожній пароль)")
+    finally:
+        # Спроба видалення на випадок багу сервера
+        user_helper.delete_user(username1, "")
 
     # Порожній юзернейм
-    resp = requests.post(
-        f"{config.BASE_URL}/users",
-        json={"username": "", "password": "SomePassword123!"},
-        timeout=10
-    )
-    assert resp.status_code in [400, 422]
-    print("  - Валідація порожнього юзернейма пройдена")
+    try:
+        resp = requests.post(
+            f"{config.BASE_URL}/users",
+            json={"username": "", "password": "SomePassword123!"},
+            timeout=10
+        )
+        assert resp.status_code in [400, 422]
+        print("  - Валідація порожнього юзернейма пройдена")
+    finally:
+        # Тут юзернейм порожній, тому видаляти нікого
+        pass
 
 def test_access_alien_data():
     """
