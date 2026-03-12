@@ -23,7 +23,7 @@
 ### Завантаження конфігурації
 
 ```bash
-wget -O docker-compose.yml https://raw.githubusercontent.com/Bohdan-Nerushev/MailServiceAPI/main/docker-compose.yml
+wget -O install_server.sh  https://raw.githubusercontent.com/Bohdan-Nerushev/MailServiceAPI/main/install_server.sh
 ```
 
 Відкрийте інсталяційний скрипт і вкажіть у ньому необхідні параметри для `.env`.
