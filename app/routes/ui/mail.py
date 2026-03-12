@@ -1,4 +1,5 @@
 import os
+import logging
 from fastapi import APIRouter
 from fastapi import Form
 from fastapi import Request
@@ -225,7 +226,7 @@ async def handle_delete_mail(
         password=user["password"],
         uid=uid,
         source_folder=folder,
-        dest_folder="Trash"
+        target_folder="Trash"
     )
 
     if success:
@@ -264,7 +265,7 @@ async def handle_restore_mail(
         password=user["password"],
         uid=uid,
         source_folder="Trash",
-        dest_folder="INBOX"
+        target_folder="INBOX"
     )
     return RedirectResponse(
         url=f"/ui/inbox?folder=Trash&user={user['username']}",

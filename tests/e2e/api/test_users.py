@@ -1,0 +1,151 @@
+import requests
+import uuid
+from tests.e2e import config
+from tests.e2e.utils import user_helper
+
+def test_user_lifecycle():
+    """
+    Позитивний тест: Створення -> Отримання списку -> Зміна паролю -> Видалення.
+    """
+    print("Запуск: test_user_lifecycle")
+    
+    unique_name = f"{config.TEST_USER_PREFIX}{uuid.uuid4().hex[:6]}"
+    password = config.DEFAULT_PASSWORD
+    new_password = "NewSecurePassword123!"
+    
+    try:
+        # 1. Створення користувача (Positive)
+        create_resp = requests.post(
+            f"{config.BASE_URL}/users/",
+            json={"username": unique_name, "password": password},
+            timeout=10
+        )
+        assert create_resp.status_code == 201, f"Очікувався 201, отримано {create_resp.status_code}: {create_resp.text}"
+        print(f"  - Користувача {unique_name} створено")
+
+        # 2. Отримання списку та перевірка наявності (List Users)
+        list_resp = requests.get(f"{config.BASE_URL}/users/", timeout=10)
+        assert list_resp.status_code == 200
+        users = list_resp.json().get("users", [])
+        assert any(u['username'] == unique_name for u in users), f"Користувач {unique_name} не знайдений у списку"
+        print("  - Користувача знайдено у списку")
+
+        # 3. Зміна паролю (Change Password)
+        change_resp = requests.put(
+            f"{config.BASE_URL}/users/{unique_name}/password",
+            json={
+                "current_password": password,
+                "new_password": new_password
+            },
+            timeout=10
+        )
+        assert change_resp.status_code == 200
+        print("  - Пароль успішно змінено")
+
+        # 4. Перевірка негативного кейсу: спроба створити дублікат (Negative)
+        dup_resp = requests.post(
+            f"{config.BASE_URL}/users/",
+            json={"username": unique_name, "password": password},
+            timeout=10
+        )
+        assert dup_resp.status_code == 400, "Очікувався 400 при створенні дубліката"
+        print("  - Перевірка дубліката пройшла успішно (код 400)")
+
+    finally:
+        # 5. Видалення (Delete)
+        print(f"  - Видалення користувача {unique_name}")
+        # Спробуємо видалити з новим паролем (якщо він змінився)
+        del_resp = requests.delete(
+            f"{config.BASE_URL}/users/{unique_name}",
+            headers={"X-User-Password": new_password},
+            timeout=10
+        )
+        # Якщо пароль не встиг змінитися (помилка вище), пробуємо старий
+        if del_resp.status_code != 200:
+             requests.delete(
+                f"{config.BASE_URL}/users/{unique_name}",
+                headers={"X-User-Password": password},
+                timeout=10
+            )
+
+def test_delete_user_invalid_password():
+    """
+    Негативний тест: Спроба видалення користувача з неправильним паролем.
+    """
+    print("Запуск: test_delete_user_invalid_password")
+    user = user_helper.create_unique_user()
+    try:
+        resp = requests.delete(
+            f"{config.BASE_URL}/users/{user['username']}",
+            headers={"X-User-Password": "wrong_password"},
+            timeout=10
+        )
+        assert resp.status_code == 401, f"Очікувався 401, отримано {resp.status_code}"
+        print("  - Тест на неправильний пароль при видаленні пройдено")
+    finally:
+        user_helper.delete_user(user['username'], user['password'])
+
+def test_create_user_invalid():
+    """
+    Негативний тест: Спроба створення користувача з некоректними даними.
+    """
+    print("Запуск: test_create_user_invalid")
+    
+    # Порожній пароль
+    resp = requests.post(
+        f"{config.BASE_URL}/users",
+        json={"username": f"invalid_{uuid.uuid4().hex[:6]}", "password": ""},
+        timeout=10
+    )
+    assert resp.status_code in [400, 422]
+    print("  - Валідація порожнього пароля пройдена (порожній пароль)")
+
+    # Порожній юзернейм
+    resp = requests.post(
+        f"{config.BASE_URL}/users",
+        json={"username": "", "password": "SomePassword123!"},
+        timeout=10
+    )
+    assert resp.status_code in [400, 422]
+    print("  - Валідація порожнього юзернейма пройдена")
+
+def test_access_alien_data():
+    """
+    Негативний тест: Спроба доступу до даних іншого користувача.
+    """
+    print("Запуск: test_access_alien_data")
+    user1 = user_helper.create_unique_user()
+    user2_name = f"{config.TEST_USER_PREFIX}{uuid.uuid4().hex[:6]}"
+    user2_pass = "DifferentPass123!"
+    requests.post(
+        f"{config.BASE_URL}/users/",
+        json={"username": user2_name, "password": user2_pass},
+        timeout=10
+    )
+    user2 = {"username": user2_name, "password": user2_pass}
+
+    try:
+        # User1 намагається видалити User2
+        resp = requests.delete(
+            f"{config.BASE_URL}/users/{user2['username']}",
+            headers={"X-User-Password": user1['password']},
+            timeout=10
+        )
+        assert resp.status_code in [401, 403]
+        print("  - Заборона видалення чужого аккаунта пройдена")
+    finally:
+        user_helper.delete_user(user1['username'], user1['password'])
+        user_helper.delete_user(user2['username'], user2['password'])
+
+if __name__ == "__main__":
+    try:
+        test_user_lifecycle()
+        test_delete_user_invalid_password()
+        test_create_user_invalid()
+        test_access_alien_data()
+        print("Усі E2E тести Users API (позитивні та негативні) пройшли успішно!\n")
+    except Exception as e:
+        print(f"Тест провалено: {e}")
+        import traceback
+        traceback.print_exc()
+        exit(1)
