@@ -103,7 +103,7 @@ services:
     restart: unless-stopped
 
   postfix-exporter:
-    image: kumina/postfix_exporter:latest
+    image: sergeymakinen/postfix_exporter:latest
     container_name: postfix-exporter
     volumes:
       - /var/log/mail.log:/var/log/mail.log:ro
@@ -114,12 +114,12 @@ services:
     restart: unless-stopped
 
   dovecot-exporter:
-    image: atlassian/dovecot-exporter:latest
+    image: joshperry/dovecot-exporter:latest
     container_name: dovecot-exporter
     volumes:
       - /var/run/dovecot:/var/run/dovecot:ro
     command:
-      - '--dovecot.socket-path=/var/run/dovecot/stats'
+      - '-dovecot.stats-path=/var/run/dovecot/stats'
     expose:
       - 9166
     networks:
