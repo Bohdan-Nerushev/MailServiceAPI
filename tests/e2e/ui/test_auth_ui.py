@@ -58,11 +58,11 @@ def test_ui_change_password():
     Позитивний тест UI: Зміна паролю через веб-форму.
     """
     print("Запуск: test_ui_change_password")
-    user = user_helper.create_unique_user()
     session = requests.Session()
     new_password = "NewUISecretPass123!"
-
+    user = None
     try:
+        user = user_helper.create_unique_user()
         # Логін
         session.post(f"{config.BASE_URL}/ui/login", data={"username": user['username'], "password": user['password']}, timeout=10)
         
@@ -94,17 +94,18 @@ def test_ui_change_password():
 
     finally:
         # Прибираємо за собою (використовуємо новий пароль для видалення)
-        requests.delete(f"{config.BASE_URL}/users/{user['username']}", headers={"X-User-Password": new_password}, timeout=10)
+        if user:
+            requests.delete(f"{config.BASE_URL}/users/{user['username']}", headers={"X-User-Password": new_password}, timeout=10)
 
 def test_ui_delete_user():
     """
     Позитивний тест UI: Видалення аккаунту через веб-форму підтвердження.
     """
     print("Запуск: test_ui_delete_user")
-    user = user_helper.create_unique_user()
     session = requests.Session()
-
+    user = None
     try:
+        user = user_helper.create_unique_user()
         # Логін
         session.post(f"{config.BASE_URL}/ui/login", data={"username": user['username'], "password": user['password']}, timeout=10)
         
@@ -125,7 +126,8 @@ def test_ui_delete_user():
 
     finally:
         # Про всяк випадок спроба видалення через API, якщо UI тест провалився
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 def test_ui_login_invalid():
     """
@@ -182,10 +184,10 @@ def test_ui_change_password_invalid():
     Негативний тест UI: Спроба зміни пароля з неправильним старим паролем.
     """
     print("Запуск: test_ui_change_password_invalid")
-    user = user_helper.create_unique_user()
     session = requests.Session()
-
+    user = None
     try:
+        user = user_helper.create_unique_user()
         session.post(f"{config.BASE_URL}/ui/login", data={"username": user['username'], "password": user['password']}, timeout=10)
         
         resp = session.post(
@@ -202,17 +204,18 @@ def test_ui_change_password_invalid():
         assert "bg-rose-50" in resp.text or "невірний" in resp.text.lower() or resp.status_code != 200
         print("  - Перевірка неправильного старого пароля пройдена")
     finally:
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 def test_ui_delete_user_invalid_confirm():
     """
     Негативний тест UI: Видалення аккаунту з неправильним словом-підтвердженням.
     """
     print("Запуск: test_ui_delete_user_invalid_confirm")
-    user = user_helper.create_unique_user()
     session = requests.Session()
-
+    user = None
     try:
+        user = user_helper.create_unique_user()
         session.post(f"{config.BASE_URL}/ui/login", data={"username": user['username'], "password": user['password']}, timeout=10)
         
         resp = session.post(
@@ -229,7 +232,8 @@ def test_ui_delete_user_invalid_confirm():
         assert "DELETE" in resp.text or "bg-rose-50" in resp.text
         print("  - Перевірка неправильного слова-підтвердження при видаленні пройдена")
     finally:
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 if __name__ == "__main__":
     try:

@@ -10,10 +10,12 @@ def test_mail_flow():
     print("Запуск: test_mail_flow")
     
     # Створюємо двох користувачів (Аліса і Боб)
-    alice = user_helper.create_unique_user()
-    bob = user_helper.create_unique_user()
+    alice = None
+    bob = None
     
     try:
+        alice = user_helper.create_unique_user()
+        bob = user_helper.create_unique_user()
         subject = "E2E Test Subject"
         body = "Hello Bob, this is a test email."
         
@@ -71,8 +73,10 @@ def test_mail_flow():
         print("  - Лист успішно видалено")
 
     finally:
-        user_helper.delete_user(alice['username'], alice['password'])
-        user_helper.delete_user(bob['username'], bob['password'])
+        if alice:
+            user_helper.delete_user(alice['username'], alice['password'])
+        if bob:
+            user_helper.delete_user(bob['username'], bob['password'])
 
 def test_send_mail_invalid():
     """
@@ -96,10 +100,12 @@ def test_api_access_alien_mail():
     Негативний тест: Спроба доступу до чужого листа через API.
     """
     print("Запуск: test_api_access_alien_mail")
-    user1 = user_helper.create_unique_user()
-    user2 = user_helper.create_unique_user()
+    user1 = None
+    user2 = None
     
     try:
+        user1 = user_helper.create_unique_user()
+        user2 = user_helper.create_unique_user()
         # Юзер 1 відправляє собі листа
         requests.post(
             f"{config.BASE_URL}/mail/send",
@@ -132,8 +138,10 @@ def test_api_access_alien_mail():
         print("  - Заборона доступу до чужої пошти пройдена")
         
     finally:
-        user_helper.delete_user(user1['username'], user1['password'])
-        user_helper.delete_user(user2['username'], user2['password'])
+        if user1:
+            user_helper.delete_user(user1['username'], user1['password'])
+        if user2:
+            user_helper.delete_user(user2['username'], user2['password'])
 
 if __name__ == "__main__":
     try:

@@ -8,11 +8,10 @@ def test_ui_mail_cycle():
     Позитивний тест UI: Compose -> Send -> Inbox -> Trash -> Restore -> Permanent Delete.
     """
     print("Запуск: test_ui_mail_cycle (повний цикл)")
-    
-    user = user_helper.create_unique_user()
-    session = auth_helper.get_ui_session(user['username'], user['password'])
-    
+    user = None
     try:
+        user = user_helper.create_unique_user()
+        session = auth_helper.get_ui_session(user['username'], user['password'])
         # 1. Відправка листа (UI Compose)
         subject = f"UI Trash Test {int(time.time())}"
         session.post(
@@ -63,17 +62,17 @@ def test_ui_mail_cycle():
         print("  - Лист остаточно видалено з кошика")
 
     finally:
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 def test_ui_compose_empty_fields():
     """
     Негативний тест UI: Спроба відправки листа з порожніми полями.
     """
-    print("Запуск: test_ui_compose_empty_fields")
-    user = user_helper.create_unique_user()
-    session = auth_helper.get_ui_session(user['username'], user['password'])
-    
+    user = None
     try:
+        user = user_helper.create_unique_user()
+        session = auth_helper.get_ui_session(user['username'], user['password'])
         # Відправка без теми та тіла (requests не враховує HTML5 required атрибути, тому це перевірить серверну логіку)
         resp = session.post(
             f"{config.BASE_URL}/ui/compose",
@@ -85,7 +84,8 @@ def test_ui_compose_empty_fields():
         assert "compose" in resp.url or "error" in resp.text.lower()
         print("  - Валідація порожніх полів при відправці через UI пройдена")
     finally:
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 def test_ui_cross_user_mail():
     """
@@ -93,10 +93,12 @@ def test_ui_cross_user_mail():
     """
     print("Запуск: test_ui_cross_user_mail (User 1 -> User 2)")
     
-    alice = user_helper.create_unique_user()
-    bob = user_helper.create_unique_user()
+    alice = None
+    bob = None
     
     try:
+        alice = user_helper.create_unique_user()
+        bob = user_helper.create_unique_user()
         # 1. Alice надсилає листа Бобу
         alice_session = auth_helper.get_ui_session(alice['username'], alice['password'])
         subject = f"Cross-user Test {int(time.time())}"
@@ -116,8 +118,10 @@ def test_ui_cross_user_mail():
         print(f"  - Bob ({bob['username']}) отримав лист від Alice")
 
     finally:
-        user_helper.delete_user(alice['username'], alice['password'])
-        user_helper.delete_user(bob['username'], bob['password'])
+        if alice:
+            user_helper.delete_user(alice['username'], alice['password'])
+        if bob:
+            user_helper.delete_user(bob['username'], bob['password'])
 
 if __name__ == "__main__":
     try:

@@ -73,8 +73,9 @@ def test_delete_user_invalid_password():
     Негативний тест: Спроба видалення користувача з неправильним паролем.
     """
     print("Запуск: test_delete_user_invalid_password")
-    user = user_helper.create_unique_user()
+    user = None
     try:
+        user = user_helper.create_unique_user()
         resp = requests.delete(
             f"{config.BASE_URL}/users/{user['username']}",
             headers={"X-User-Password": "wrong_password"},
@@ -83,7 +84,8 @@ def test_delete_user_invalid_password():
         assert resp.status_code == 401, f"Очікувався 401, отримано {resp.status_code}"
         print("  - Тест на неправильний пароль при видаленні пройдено")
     finally:
-        user_helper.delete_user(user['username'], user['password'])
+        if user:
+            user_helper.delete_user(user['username'], user['password'])
 
 def test_create_user_invalid():
     """
@@ -114,17 +116,18 @@ def test_access_alien_data():
     Негативний тест: Спроба доступу до даних іншого користувача.
     """
     print("Запуск: test_access_alien_data")
-    user1 = user_helper.create_unique_user()
-    user2_name = f"{config.TEST_USER_PREFIX}{uuid.uuid4().hex[:6]}"
-    user2_pass = "DifferentPass123!"
-    requests.post(
-        f"{config.BASE_URL}/users/",
-        json={"username": user2_name, "password": user2_pass},
-        timeout=10
-    )
-    user2 = {"username": user2_name, "password": user2_pass}
-
+    user1 = None
+    user2 = None
     try:
+        user1 = user_helper.create_unique_user()
+        user2_name = f"{config.TEST_USER_PREFIX}{uuid.uuid4().hex[:6]}"
+        user2_pass = "DifferentPass123!"
+        requests.post(
+            f"{config.BASE_URL}/users/",
+            json={"username": user2_name, "password": user2_pass},
+            timeout=10
+        )
+        user2 = {"username": user2_name, "password": user2_pass}
         # User1 намагається видалити User2
         resp = requests.delete(
             f"{config.BASE_URL}/users/{user2['username']}",
@@ -134,8 +137,10 @@ def test_access_alien_data():
         assert resp.status_code in [401, 403]
         print("  - Заборона видалення чужого аккаунта пройдена")
     finally:
-        user_helper.delete_user(user1['username'], user1['password'])
-        user_helper.delete_user(user2['username'], user2['password'])
+        if user1:
+            user_helper.delete_user(user1['username'], user1['password'])
+        if user2:
+            user_helper.delete_user(user2['username'], user2['password'])
 
 if __name__ == "__main__":
     try:

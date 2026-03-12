@@ -92,23 +92,24 @@ def run_e2e_test():
         logger.warning(f"Benutzer {TEST_USER} existiert bereits. Bereinige Testumgebung...")
         delete_user(TEST_USER)
 
-    # 2. Erstellung
-    if not create_user(TEST_USER, INITIAL_PASS):
-        sys.exit(1)
+    try:
+        # 2. Erstellung
+        if not create_user(TEST_USER, INITIAL_PASS):
+            sys.exit(1)
 
-    # 3. Negativ-Test: Falsches Passwort
-    if not change_password(TEST_USER, "FalschesPasswort", NEW_PASS, expect_success=False):
-        sys.exit(1)
+        # 3. Negativ-Test: Falsches Passwort
+        if not change_password(TEST_USER, "FalschesPasswort", NEW_PASS, expect_success=False):
+            sys.exit(1)
 
-    # 4. Positiv-Test: Korrektes Passwort
-    if not change_password(TEST_USER, INITIAL_PASS, NEW_PASS, expect_success=True):
-        sys.exit(1)
+        # 4. Positiv-Test: Korrektes Passwort
+        if not change_password(TEST_USER, INITIAL_PASS, NEW_PASS, expect_success=True):
+            sys.exit(1)
 
-    # 5. Abschluss
-    if not delete_user(TEST_USER):
-        sys.exit(1)
+        logger.info("E2E-Test erfolgreich abgeschlossen!")
 
-    logger.info("E2E-Test erfolgreich abgeschlossen!")
+    finally:
+        # 5. Abschluss
+        delete_user(TEST_USER)
 
 if __name__ == "__main__":
     try:
