@@ -257,6 +257,13 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
+
+    location /nginx_status {
+        stub_status;
+        allow 127.0.0.1;
+        allow 172.16.0.0/12;
+        deny all;
+    }
 }
 EOF
 

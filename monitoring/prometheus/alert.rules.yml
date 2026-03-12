@@ -1,0 +1,42 @@
+groups:
+  - name: mail-service-alerts
+    rules:
+      # Latency Alert: High response time (> 1s) for 5 minutes
+      - alert: HighLatency
+        expr: http_request_duration_seconds_sum / http_request_duration_seconds_count > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API Latency"
+          description: "API response time is higher than 1 second on average."
+
+      # Error Rate Alert: HTTP 5xx errors > 5%
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx Error Rate"
+          description: "More than 5% of requests are resulting in 5xx errors."
+
+      # Queue Size (Postfix): More than 50 messages in queue
+      - alert: PostfixQueueGrowing
+        expr: postfix_queue_length > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Postfix Queue Growing"
+          description: "Mail queue length is above 50 messages."
+
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Infrastructure Service Down"
+          description: "A monitoring target {{ $labels.instance }} has been down for more than 1 minute."
