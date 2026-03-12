@@ -24,6 +24,7 @@ discovery.relabel "docker_containers" {
 }
 
 loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
   targets    = discovery.relabel.docker_containers.output
   forward_to = [loki.write.local_loki.receiver]
 }

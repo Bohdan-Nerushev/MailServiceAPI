@@ -16,13 +16,7 @@ common:
     kvstore:
       store: inmemory
 
-query_range:
-  results_cache:
-    cache:
-      embedded_collector:
-        enabled: true
-        max_size_items: 1024
-        validity: 1h
+query_range: {}
 
 schema_config:
   configs:

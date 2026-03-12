@@ -50,7 +50,7 @@ services:
     volumes:
       - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: run --host=auto /etc/alloy/config.alloy
+    command: run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data
     networks:
       - monitoring_network
     depends_on:
@@ -105,6 +105,7 @@ services:
   postfix-exporter:
     image: sergeymakinen/postfix_exporter:latest
     container_name: postfix-exporter
+    user: root
     volumes:
       - /var/log/mail.log:/var/log/mail.log:ro
     expose:
@@ -119,7 +120,7 @@ services:
     volumes:
       - /var/run/dovecot:/var/run/dovecot:ro
     command:
-      - '-dovecot.stats-path=/var/run/dovecot/stats'
+      - '--dovecot.socket-path=/var/run/dovecot/stats'
     expose:
       - 9166
     networks:
