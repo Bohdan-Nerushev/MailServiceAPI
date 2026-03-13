@@ -48,7 +48,17 @@ app = FastAPI(
     version="0.1.0",
     openapi_tags=tags_metadata
 )
-instrumentator = Instrumentator()
+instrumentator = Instrumentator(
+    app_name="fastapi-app",
+    should_group_status_codes=False,
+    should_ignore_untemplated=True,
+    should_respect_env_var=True,
+    should_instrument_requests_inprogress=True,
+    excluded_handlers=[".*admin.*", "/metrics"],
+    env_var_name="ENABLE_METRICS",
+    inprogress_name="fastapi_requests_in_progress",
+    inprogress_labels=True,
+)
 instrumentator.instrument(app).expose(app)
 # Mounting static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

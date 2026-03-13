@@ -39,6 +39,10 @@ discovery.relabel "fastapi_logs" {
     target_label = "job"
     replacement  = "fastapi-app"
   }
+  rule {
+    target_label = "compose_service"
+    replacement  = "app-fastapi"
+  }
 }
 
 // Scrape logs from FastAPI app.log
