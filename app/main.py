@@ -91,9 +91,13 @@ instrumentator.add(
 )
 
 # Adding fastapi_app_info for dashboard variable discovery
-from prometheus_client import Gauge
-info_metric = Gauge("fastapi_app_info", "FastAPI application information", ["app_name"])
-info_metric.labels(app_name="fastapi-app").set(1)
+from prometheus_client import Gauge, REGISTRY
+try:
+    info_metric = Gauge("fastapi_app_info", "FastAPI application information", ["app_name"])
+    info_metric.labels(app_name="fastapi-app").set(1)
+except ValueError:
+    # Metric already registered (e.g. during reload)
+    pass
 
 # Adding fastapi_responses_total (often same as requests_total but with status_code)
 instrumentator.add(
