@@ -114,6 +114,10 @@ venv/bin/gunicorn app.main:app \
     --bind 0.0.0.0:8090 \
     --daemon
 ```
+#  Перезавантажити застосунок 
+```bash
+sudo systemctl restart mail-api
+```
 
 ---
 
