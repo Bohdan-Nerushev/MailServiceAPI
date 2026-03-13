@@ -1,4 +1,12 @@
 import os
+import sys
+
+# Ensuring the project root is in sys.path when running app/main.py directly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from fastapi import FastAPI
 import logging
 from dotenv import load_dotenv
