@@ -1,349 +1,150 @@
 # 📧 Mail Service API (FastAPI)
 
-Dieses Projekt stellt eine **REST-API zur Verwaltung eines Mailservers** bereit, der auf **Postfix** und **Dovecot** basiert.  
+Dieses Projekt bietet eine umfassende **REST-API und Web-Oberfläche zur Verwaltung eines Mailservers**, basierend auf **Postfix**, **Dovecot** und **FastAPI**. Es enthält einen vollständigen Observability-Stack für ein produktionsbereites Monitoring.
 
-Das System ermöglicht:
+## 🌟 Hauptfunktionen
 
-- Erstellen und Verwalten von Benutzern  
-- Ändern von Passwörtern  
-- Senden und Empfangen von E-Mails über eine **API** oder eine **Weboberfläche**
-
-Die Lösung ist auf die **Automatisierung der Mailserver-Administration** und die **Integration mit anderen Diensten** ausgelegt.
-
-## Architektur
-
-Die Architektur umfasst:
-
-- SMTP-Server
-- IMAP-Server
-- Spam-Filter-System
-- API-Schicht für den programmgesteuerten Zugriff auf Mailfunktionen
+- **Benutzerverwaltung**: Erstellen, Auflisten, Löschen von Benutzern und Passwortverwaltung.
+- **E-Mail-Operationen**: Senden über SMTP, Zugriff auf Postfächer über IMAP (Abrufen, Lesen, Löschen).
+- **Web-UI**: Benutzerfreundliche Oberfläche für Administration und Webmail.
+- **Vollständige Observability**: Integrierte Grafana-Dashboards mit Prometheus-Metriken und Loki-Logs.
+- **Sicherheit**: Integrierter SpamAssassin und automatisierte SSL/TLS-Konfiguration.
+- **Ressourcen-Monitoring**: Echtzeit-Status der Systemressourcen und Mail-Dienste.
 
 ---
 
-# 🚀 Installation und Start
+## 🏗 Systemarchitektur
 
-## 1. Schnelle Installation über Docker (empfohlen)
+Das System besteht aus mehreren integrierten Schichten:
 
-Dies ist der einfachste Weg, den Server bereitzustellen.  
-Das Skript installiert automatisch Abhängigkeiten, konfiguriert Maildienste und startet die API.
+1.  **Kern-Dienste**: Postfix (SMTP), Dovecot (IMAP/POP3), SpamAssassin (Antispam).
+2.  **API-Schicht**: FastAPI-Anwendung, die mit Gunicorn/Uvicorn läuft.
+3.  **Proxy-Schicht**: Nginx als Reverse Proxy und Metriken-Lieferant.
+4.  **Monitoring-Stack (Dockerized)**:
+    - **Prometheus**: Metriken-Sammlung.
+    - **Loki**: Log-Aggregation.
+    - **Grafana**: Visualisierungs-Dashboard.
+    - **Grafana Alloy**: Einheitlicher Telemetrie-Kollektor.
+    - **Exporters**: Node Exporter, cAdvisor, Nginx/Postfix/Dovecot Exporter.
 
-### Konfiguration herunterladen
+---
+
+## 🚀 Installation und Setup
+
+### 1. Automatisierte Installation (Empfohlen für Linux)
+
+Dieses Skript installiert alle Systemabhängigkeiten, konfiguriert Postfix/Dovecot und richtet den API-Dienst ein.
 
 ```bash
 wget -O install_server.sh https://raw.githubusercontent.com/Bohdan-Nerushev/MailServiceAPI/main/install_server.sh
-```
-
-### Installationsskript bearbeiten
-
-Öffnen Sie das Skript und geben Sie die erforderlichen Parameter für `.env` an.
-
-### Installation starten
-
-```bash
 chmod +x install_server.sh
 sudo ./install_server.sh
 ```
 
-### Was das Skript ausführt
+**Was das Skript ausführt:**
+- Installation von Python 3.12, Nginx, Postfix, Dovecot, SpamAssassin.
+- Konfiguration der Firewall (UFW) und SSL-Zertifikate.
+- Einrichtung der FastAPI-Anwendung als Systemd-Dienst (`mail-api.service`).
+- Konfiguration von Nginx als Reverse Proxy für die API und das Monitoring.
 
-- Installation der erforderlichen Systempakete
-- Konfiguration von **Postfix** und **Dovecot**
-- Konfiguration der **Anti-Spam-Dienste**
-- Start der Container über **Docker Compose**
-- Start des **API-Dienstes**
+### 2. Monitoring-Stack bereitstellen
 
-Diese Variante ist optimal für **Production-Umgebungen**.
+Die Monitoring-Suite läuft in Docker-Containern:
+
+```bash
+docker-compose up -d
+```
+
+Zugriff auf **Grafana**: `http://ihre-server-ip/monitoring/` (Standard-Login: `admin` / `admin`).
 
 ---
 
-# 2️⃣ Manuelle Installation (ohne Docker)
+## ⚙️ Konfiguration (.env)
 
-## Repository klonen
+| Variable | Beschreibung | Standardwert |
+|----------|-------------|--------------|
+| `DOMAIN` | Ihre Server-Domain oder IP | `localhost` |
+| `SMTP_SERVER` | SMTP-Server Host | `localhost` |
+| `SMTP_PORT` | SMTP-Server Port | `587` |
+| `IMAP_SERVER` | IMAP-Server Host | `localhost` |
+| `IMAP_PORT` | IMAP-Server Port | `143` |
+| `APP_PORT` | Port der FastAPI-Anwendung | `8090` |
+| `DEBUG` | Debug-Modus aktivieren | `False` |
+| `SUDO_USER_PASSWORD` | Passwort für die Systembenutzer-Verwaltung | *Erforderlich* |
+| `DISPLAY_TIMEZONE` | Zeitzone für die Protokollierung | `Europe/Berlin` |
 
+---
+
+## 🌐 API & UI Endpunkte
+
+### Dokumentation
+- **Swagger UI**: `http://ihre-server-ip/docs`
+- **ReDoc**: `http://ihre-server-ip/redoc`
+
+### API Übersicht
+
+| Kategorie | Methode | Endpunkt | Beschreibung | Auth/Header |
+|-----------|---------|---------|--------------|-------------|
+| **System** | GET | `/health` | Status von System & Diensten | - |
+| **Benutzer** | GET | `/users/` | Alle Systembenutzer auflisten | - |
+| **Benutzer** | POST | `/users/` | Neuen Mail-Benutzer anlegen | JSON Body |
+| **Benutzer** | PUT | `/users/{u}/password` | Passwort ändern | JSON Body |
+| **Benutzer** | DELETE | `/users/{u}` | Benutzer & Postfach löschen | `X-User-Password` Header |
+| **E-Mail** | POST | `/mail/send` | E-Mail über SMTP senden | JSON Body |
+| **E-Mail** | GET | `/mail/inbox/{u}` | Neueste E-Mails abrufen | `x-password` Header |
+| **E-Mail** | GET | `/mail/message/{uid}` | Vollständigen Inhalt abrufen | `x-password` Header |
+
+---
+
+## 📊 Observability & Monitoring
+
+### Grafana Dashboards
+- **System-Metriken**: Node Exporter (ID: `1860`).
+- **Container-Metriken**: cAdvisor (ID: `14282`).
+- **Nginx-Status**: Nginx Exporter (ID: `11199`).
+- **API-Performance**: FastAPI Instrumentator (ID: `16110`).
+- **Mail-Logs**: Zugriff über Loki (`{job="fastapi"}` oder `{job="docker_logs"}`).
+
+### Metriken-Endpunkt
+Die API stellt Prometheus-kompatible Metriken unter `/metrics` bereit.
+
+---
+
+## 🛠 Wartung und Fehlerbehebung
+
+### Dienst-Status prüfen
 ```bash
-git clone https://github.com/Bohdan-Nerushev/MailServiceAPI.git
-cd MailServiceAPI
+sudo systemctl status mail-api
+sudo systemctl status postfix
+sudo systemctl status dovecot
 ```
 
-## Vorbereitung der Python-Umgebung
-
+### Protokolle (Logs)
 ```bash
-# Virtuelle Umgebung erstellen
-python3 -m venv venv
+tail -f app.log                # API Anwendungs-Logs
+tail -f /var/log/mail.log       # Mailserver-Logs
+docker-compose logs -f          # Monitoring-Stack Logs
+```
 
-# Aktivieren
-source venv/bin/activate
-
-# Abhängigkeiten installieren
-pip install -r requirements.txt
+### Konfiguration validieren
+```bash
+postconf -n                     # Aktive Postfix-Konfiguration
+doveconf -n                     # Aktive Dovecot-Konfiguration
+nginx -t                        # Nginx Syntax-Prüfung
 ```
 
 ---
 
-# 3️⃣ Konfiguration der Umgebungsvariablen
+## 🧪 Entwicklung
 
-Erstellen Sie die Datei `.env`.
-
-```bash
-nano .env
-```
-
-Geben Sie die erforderlichen Konfigurationsparameter an.
-
----
-
-# ▶️ Anwendung starten
-
-## Entwicklungsmodus
-
-```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd) && source venv/bin/activate && python3 app/main.py
-```
-
-oder über **Uvicorn**
-
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8090
-```
-
----
-
-## Production-Modus
-
-Für einen stabilen Betrieb in Production wird **Gunicorn mit Uvicorn-Workers** verwendet.
-
+### Lokal ausführen
 ```bash
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-
-venv/bin/gunicorn app.main:app \
---workers 4 \
---worker-class uvicorn.workers.UvicornWorker \
---bind 0.0.0.0:8090 \
---daemon
+source venv/bin/activate
+uvicorn app.main:app --reload --port 8090
 ```
 
----
-
-## Anwendung neu starten
-
-```bash
-sudo systemctl restart mail-api
-```
-
-## Logs anzeigen
-
-```bash
-tail -f app.log
-```
-
----
-
-## Tests ausführen
-
+### Tests ausführen
 ```bash
 python3 tests/run_all.py
-```
-
----
-
-# 🌐 Endpoints (API und UI)
-
-## API Endpoints (REST JSON)
-
-### System
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| GET | `/health` | Überprüfung des Systemstatus |
-
-### Users
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| GET | `/users/` | Liste aller Benutzer |
-| POST | `/users/` | Neuen Benutzer erstellen |
-| PUT | `/users/{username}/password` | Benutzerpasswort ändern |
-| DELETE | `/users/{username}` | Benutzer und Postfach löschen |
-
-### Mail
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| POST | `/mail/send` | E-Mail über SMTP senden |
-| GET | `/mail/inbox/{username}` | Liste der E-Mails abrufen |
-| GET | `/mail/message/{uid}` | Vollständige Nachricht abrufen |
-| DELETE | `/mail/message/{uid}` | E-Mail dauerhaft löschen |
-
----
-
-# UI Endpoints (Weboberfläche)
-
-## General & Auth
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| GET | `/ui/` | Hauptseite |
-| GET / POST | `/ui/login` | Login |
-| GET / POST | `/ui/register` | Registrierung |
-| GET / POST | `/ui/change-password` | Passwort ändern |
-| GET / POST | `/ui/delete-user` | Konto löschen |
-| POST | `/ui/logout` | Logout |
-
----
-
-## Mailbox (Webmail)
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| GET | `/ui/inbox` | Postfachseite |
-| GET / POST | `/ui/compose` | Neue E-Mail erstellen |
-| GET | `/ui/mail/{uid}` | Einzelne Nachricht anzeigen |
-| POST | `/ui/mail/{uid}/delete` | In Papierkorb verschieben |
-| POST | `/ui/mail/{uid}/restore` | Wiederherstellen |
-| POST | `/ui/mail/{uid}/permanent-delete` | Dauerhaft löschen |
-
----
-
-## System Dashboard
-
-| Methode | Endpoint | Beschreibung |
-|-------|-------|-------|
-| GET | `/ui/health` | Dashboard mit Status aller Dienste |
-| GET | `/ui/users` | Liste aller Benutzer |
-
----
-
-# 🛠 Technologie-Stack
-
-## Backend
-
-- **Python 3.10+**
-- **FastAPI**
-- **Uvicorn / Gunicorn**
-- **Pydantic**
-- **Prometheus FastAPI Instrumentator**
-- **python-dotenv / PyYAML**
-
----
-
-## Mail-Verarbeitung
-
-- **imap-tools** — IMAP-Integration  
-- **aiosmtplib** — asynchrones SMTP  
-- **email-validator** — Validierung von E-Mail-Adressen  
-
----
-
-## Systemmonitoring
-
-- **psutil** — CPU / RAM / Disk Monitoring
-
----
-
-## Weboberfläche
-
-- **Jinja2** — HTML-Templates  
-- **Vanilla CSS** — Styling  
-
----
-
-## Mail-Infrastruktur
-
-- **Postfix** — SMTP-Server  
-- **Dovecot** — IMAP / POP3  
-- **SpamAssassin** — Spamfilter  
-- **Procmail** — Mailzustellung  
-- **Nginx** — Reverse Proxy und Monitoring
-
----
-
-# ⚙️ Anzeigen der Service-Konfigurationen
-
-Dieser Abschnitt enthält Befehle zur Überprüfung der aktuellen Konfiguration wichtiger Dienste.
-
----
-
-# 🐘 Postfix
-
-Nur aktive Einstellungen anzeigen:
-
-```bash
-postconf -n
-```
-
-Alle Einstellungen anzeigen:
-
-```bash
-postconf
-```
-
----
-
-# 🕊️ Dovecot
-
-Aktive Konfiguration anzeigen:
-
-```bash
-doveconf -n
-```
-
-Alle Einstellungen anzeigen:
-
-```bash
-doveconf
-```
-
----
-
-# 🌐 Nginx
-
-Syntax prüfen:
-
-```bash
-nginx -t
-```
-
-Site-Konfiguration anzeigen:
-
-```bash
-cat /etc/nginx/sites-enabled/mailservice
-```
-
-Gesamte Konfiguration anzeigen:
-
-```bash
-nginx -T
-```
-
----
-
-# 📨 Procmail
-
-Globale Regeln anzeigen:
-
-```bash
-cat /etc/procmailrc
-```
-
-Benutzerregeln anzeigen:
-
-```bash
-cat ~/.procmailrc
-```
-
----
-
-# 🛡️ SpamAssassin
-
-Konfiguration prüfen:
-
-```bash
-spamassassin --lint
-```
-
-Konfigurationsdatei anzeigen:
-
-```bash
-cat /etc/spamassassin/local.cf
 ```

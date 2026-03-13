@@ -6,6 +6,7 @@ sys.path.append(os.getcwd())
 
 from tests.e2e.api import test_users, test_mail
 from tests.e2e.ui import test_auth_ui, test_mail_ui, test_system_ui
+from tests import load_test
 
 def run_all():
     print("========================================")
@@ -67,4 +68,8 @@ def run_all():
         sys.exit(1)
 
 if __name__ == "__main__":
+    # Запуск регулярних E2E тестів
     run_all()
+    
+    # Запуск лоад тестів після успішного проходження основних тестів
+    load_test.run_load_test(num_users=10, rounds=3)
