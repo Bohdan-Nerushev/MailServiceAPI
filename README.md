@@ -185,7 +185,33 @@ source venv/bin/activate
 uvicorn app.main:app --reload --port 8090
 ```
 
+### Production wie system service
+```bash
+gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8090
+```
+
 ### Tests ausführen
 ```bash
 python3 tests/run_all.py
+```
+
+---
+
+## 🔄 Vollständiger Neustart
+
+Falls Sie das gesamte System oder einzelne Komponenten neu starten müssen:
+
+### 1. Alle System-Dienste neu starten
+```bash
+sudo systemctl restart mail-api postfix dovecot nginx
+```
+
+### 2. Monitoring-Stack (Docker) neu starten
+```bash
+docker-compose restart
+```
+
+### 3. Kompletter Reset (Dienste + Container)
+```bash
+sudo systemctl restart mail-api postfix dovecot nginx && docker-compose down && docker-compose up -d
 ```
