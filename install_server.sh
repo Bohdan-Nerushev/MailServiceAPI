@@ -40,24 +40,32 @@ LOG_FILE="/var/log/mail_api_install.log"
 echo "Початок процесу розгортання на сервер..."
 sleep 2
 
-# 1. Оновлення системи та встановлення базових утиліт
-echo "--> Оновлення системних пакетів..."
+# 1. Оновлення системи та встановлення базових утиліт і сервісів
+log "Оновлення системних пакетів..."
+apt-get update && apt-get full-upgrade -y
+apt-get autoremove --purge -y
 
-sudo apt update && sudo apt full-upgrade -y 
-&& 
-sudo apt autoremove --purge -y 
-&& 
-sudo snap refresh 
-&& 
-echo "Checking for remaining upgrades..." 
-&& 
-apt list --upgradable 
-&& 
-echo "Checking snap health..." 
-&& 
-snap list
+# Налаштування для неінтерактивного встановлення Postfix
+echo "postfix postfix/mailname string $DOMAIN_NAME" | debconf-set-selections
+echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
 
-apt-get install -y curl wget software-properties-common ufw nginx
+log "Встановлення Nginx, Postfix, Dovecot та допоміжних утиліт..."
+apt-get install -y \
+    curl \
+    wget \
+    software-properties-common \
+    ufw \
+    nginx \
+    postfix \
+    dovecot-imapd \
+    dovecot-pop3d \
+    spamassassin \
+    spamc \
+    procmail \
+    libsasl2-modules \
+    ca-certificates
+
+log "Налаштування фаєрволу UFW..."
 
 ufw allow 22
 ufw allow 25
