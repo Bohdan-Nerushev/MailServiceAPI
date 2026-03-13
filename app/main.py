@@ -49,7 +49,6 @@ app = FastAPI(
     openapi_tags=tags_metadata
 )
 instrumentator = Instrumentator(
-    app_name="fastapi-app",
     should_group_status_codes=False,
     should_ignore_untemplated=True,
     should_respect_env_var=True,
