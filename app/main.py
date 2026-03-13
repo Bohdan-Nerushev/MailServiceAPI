@@ -51,13 +51,52 @@ app = FastAPI(
 instrumentator = Instrumentator(
     should_group_status_codes=False,
     should_ignore_untemplated=True,
-    should_respect_env_var=True,
     should_instrument_requests_inprogress=True,
     excluded_handlers=[".*admin.*", "/metrics"],
-    env_var_name="ENABLE_METRICS",
     inprogress_name="fastapi_requests_in_progress",
     inprogress_labels=True,
 )
+
+# Customizing default metrics to match dashboard expectations
+from prometheus_fastapi_instrumentator import metrics
+
+instrumentator.add(
+    metrics.request_size(
+        metric_name="fastapi_requests_size_bytes",
+        should_include_handler=True,
+    )
+).add(
+    metrics.response_size(
+        metric_name="fastapi_responses_size_bytes",
+        should_include_handler=True,
+    )
+).add(
+    metrics.latency(
+        metric_name="fastapi_requests_duration_seconds",
+        should_include_handler=True,
+    )
+).add(
+    metrics.requests(
+        metric_name="fastapi_requests_total",
+        should_include_handler=True,
+    )
+)
+
+# Adding fastapi_app_info for dashboard variable discovery
+from prometheus_client import Gauge
+info_metric = Gauge("fastapi_app_info", "FastAPI application information", ["app_name"])
+info_metric.labels(app_name="fastapi-app").set(1)
+
+# Adding fastapi_responses_total (often same as requests_total but with status_code)
+instrumentator.add(
+    metrics.requests(
+        metric_name="fastapi_responses_total",
+        should_include_handler=True,
+        should_include_method=True,
+        should_include_status=True,
+    )
+)
+
 instrumentator.instrument(app).expose(app)
 # Mounting static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
