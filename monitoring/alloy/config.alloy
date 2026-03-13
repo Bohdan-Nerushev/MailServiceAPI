@@ -23,7 +23,25 @@ discovery.relabel "docker_containers" {
   }
 }
 
-loki.source.docker "docker_logs" {
+// FastAPI local logs (System service)
+local.file_match "fastapi_log_file" {
+  path_targets = [{ "__path__" = "/home/bnerushev/mail-service-api/app.log" }]
+}
+
+loki.source.file "fastapi_logs" {
+  targets    = local.file_match "fastapi_log_file".targets
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+discovery.relabel "fastapi_logs" {
+  targets = local.file_match "fastapi_log_file".targets
+  rule {
+    target_label = "job"
+    replacement  = "fastapi-app"
+  }
+}
+
+discovery.relabel "docker_containers" {
   host       = "unix:///var/run/docker.sock"
   targets    = discovery.relabel.docker_containers.output
   forward_to = [loki.write.local_loki.receiver]

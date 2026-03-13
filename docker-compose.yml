@@ -52,6 +52,7 @@ services:
     volumes:
       - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/bnerushev/mail-service-api/app.log:/home/bnerushev/mail-service-api/app.log:ro
     command: run /etc/alloy/config.alloy --storage.path=/var/lib/alloy/data
     networks:
       - monitoring_network
