@@ -1,14 +1,11 @@
-logging {
-  level = "info"
-  format = "logfmt"
-}
-
-discovery.docker "linux_containers" {
+// Discover docker containers to collect logs from
+discovery.docker "docker_containers" {
   host = "unix:///var/run/docker.sock"
 }
 
+// Extract container name and set as job label
 discovery.relabel "docker_containers" {
-  targets = discovery.docker.linux_containers.targets
+  targets = discovery.docker.docker_containers.targets
 
   rule {
     source_labels = ["__meta_docker_container_name"]
@@ -23,27 +20,30 @@ discovery.relabel "docker_containers" {
   }
 }
 
+// Scrape logs from docker containers
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_containers.output
+  forward_to = [loki.write.local_loki.receiver]
+}
+
 // FastAPI local logs (System service)
 local.file_match "fastapi_log_file" {
   path_targets = [{ "__path__" = "/home/bnerushev/mail-service-api/app.log" }]
 }
 
-loki.source.file "fastapi_logs" {
-  targets    = local.file_match "fastapi_log_file".targets
-  forward_to = [loki.write.local_loki.receiver]
-}
-
+// Relabel FastAPI logs to have job="fastapi-app"
 discovery.relabel "fastapi_logs" {
-  targets = local.file_match "fastapi_log_file".targets
+  targets = local.file_match.fastapi_log_file.targets
   rule {
     target_label = "job"
     replacement  = "fastapi-app"
   }
 }
 
-discovery.relabel "docker_containers" {
-  host       = "unix:///var/run/docker.sock"
-  targets    = discovery.relabel.docker_containers.output
+// Scrape logs from FastAPI app.log
+loki.source.file "fastapi_logs" {
+  targets    = discovery.relabel.fastapi_logs.output
   forward_to = [loki.write.local_loki.receiver]
 }
 
