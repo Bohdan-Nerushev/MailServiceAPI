@@ -16,6 +16,8 @@ imap-tools==1.11.1
 Jinja2==3.1.6
 MarkupSafe==3.0.3
 packaging==26.0
+prometheus-fastapi-instrumentator==7.0.0
+prometheus_client==0.24.1
 psutil==7.2.2
 pydantic==2.12.5
 pydantic_core==2.41.5
@@ -31,4 +33,3 @@ uvicorn==0.41.0
 uvloop==0.22.1
 watchfiles==1.1.1
 websockets==16.0
-prometheus-fastapi-instrumentator==7.0.0
