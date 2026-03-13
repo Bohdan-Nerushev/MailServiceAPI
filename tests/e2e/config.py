@@ -1,13 +1,13 @@
 import os
 
-# Базова адреса API
-BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8090").rstrip("/")
+# Basis-URL der API
+BASE_URL = os.getenv("BASE_URL", "http://172.18.6.162:80").rstrip("/")
 
-# Префікс для тестових користувачів, щоб їх було легше знайти та видалити
+# Präfix für Testbenutzer, um sie leichter finden und löschen zu können
 TEST_USER_PREFIX = os.getenv("TEST_USER_PREFIX", "test_e2e_")
 
-# Дефолтний пароль для тестів
+# Standardpasswort für Tests
 DEFAULT_PASSWORD = os.getenv("DEFAULT_PASSWORD", "SecurePass123!")
 
-# Домен за замовчуванням
+# Standard-Domain
 DOMAIN = os.getenv("DOMAIN", "localhost")

@@ -4,8 +4,8 @@ import uuid
 
 def create_unique_user():
     """
-    Створює унікального користувача для тесту.
-    Повертає словник з username та password.
+    Erstellt einen eindeutigen Benutzer für den Test.
+    Gibt ein Dictionary mit username und password zurück.
     """
     username = f"{config.TEST_USER_PREFIX}{uuid.uuid4().hex[:8]}"
     password = config.DEFAULT_PASSWORD
@@ -18,12 +18,12 @@ def create_unique_user():
     
     if response.status_code == 201:
         return {"username": username, "password": password}
-    raise Exception(f"Помилка створення тестового користувача: {response.text}")
+    raise Exception(f"Fehler bei der Erstellung des Testbenutzers: {response.text}")
 
 def delete_user(username, password):
     """
-    Видаляє тестового користувача.
-    Використовує заголовок X-User-Password для авторизації видалення.
+    Löscht einen Testbenutzer.
+    Verwendet den Header X-User-Password zur Autorisierung der Löschung.
     """
     requests.delete(
         f"{config.BASE_URL}/users/{username}",

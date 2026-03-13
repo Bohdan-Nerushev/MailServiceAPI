@@ -13,31 +13,31 @@ def run_load_test(num_users=5, rounds=3):
     3. Видаляє всіх створених користувачів.
     """
     print("========================================")
-    print("ЗАПУСК НАВАНТАЖУВАЛЬНОГО ТЕСТУ (LOAD TEST)")
-    print(f"Користувачів: {num_users}, Раундів: {rounds}")
+    print("START DES LASTTESTS (LOAD TEST)")
+    print(f"Benutzer: {num_users}, Runden: {rounds}")
     print("========================================\n")
 
     users = []
     
     try:
-        # 1. Створення пулу користувачів
-        print(f"--> Створення {num_users} тестових користувачів...")
+        # 1. Erstellung des Benutzer-Pools
+        print(f"--> Erstellung von {num_users} Testbenutzern...")
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             future_to_user = {executor.submit(user_helper.create_unique_user): i for i in range(num_users)}
             for future in concurrent.futures.as_completed(future_to_user):
                 try:
                     user = future.result()
                     users.append(user)
-                    print(f"    Користувач {user['username']} створений.")
+                    print(f"    Benutzer {user['username']} erstellt.")
                 except Exception as e:
-                    print(f"    Помилка при створенні: {e}")
+                    print(f"    Fehler bei der Erstellung: {e}")
 
         if len(users) < 2:
-            print("!!! Недостатньо користувачів для тесту.")
+            print("!!! Nicht genügend Benutzer für den Test.")
             return
 
-        # 2. Відправка повідомлень
-        print(f"\n--> Початок відправки повідомлень ({rounds} раундів)...")
+        # 2. Senden von Nachrichten
+        print(f"\n--> Start des E-Mail-Versands ({rounds} Runden)...")
         
         def send_random_mail(sender):
             recipient = random.choice([u for u in users if u != sender])
@@ -59,31 +59,31 @@ def run_load_test(num_users=5, rounds=3):
                 if resp.status_code == 200:
                     return True
                 else:
-                    print(f"    [!] Помилка відправки від {sender['username']}: {resp.status_code}")
+                    print(f"    [!] Fehler beim Senden von {sender['username']}: {resp.status_code}")
                     return False
             except Exception as e:
-                print(f"    [!] Exception при відправці: {e}")
+                print(f"    [!] Exception beim Senden: {e}")
                 return False
 
         for round_idx in range(1, rounds + 1):
-            print(f"    Раунд {round_idx}...")
+            print(f"    Runde {round_idx}...")
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 results = list(executor.map(send_random_mail, users))
                 success_count = sum(1 for r in results if r)
-                print(f"    Завершено раунд {round_idx}: {success_count}/{len(users)} успішно.")
+                print(f"    Runde {round_idx} abgeschlossen: {success_count}/{len(users)} erfolgreich.")
 
-        print("\n--> Навантажувальний тест відправки завершено.")
+        print("\n--> Lasttest des Versands abgeschlossen.")
 
     except Exception as e:
-        print(f"!!! Помилка під час лоад-тесту: {e}")
+        print(f"!!! Fehler während des Lasttests: {e}")
     
     finally:
-        # 3. Прибирання
-        print(f"\n--> Видалення {len(users)} тестових користувачів...")
+        # 3. Bereinigung
+        print(f"\n--> Löschen von {len(users)} Testbenutzern...")
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             for user in users:
                 executor.submit(user_helper.delete_user, user['username'], user['password'])
-        print("--> Очищення завершено.")
+        print("--> Bereinigung abgeschlossen.")
         print("========================================\n")
 
 if __name__ == "__main__":

@@ -3,8 +3,8 @@ from tests.e2e import config
 
 def get_ui_session(username, password):
     """
-    Створює сесію requests та виконує вхід через UI форму login.
-    Повертає об'єкт session з встановленими cookies.
+    Erstellt eine Requests-Session und führt den Login über das UI-Formular durch.
+    Gibt ein Session-Objekt mit gesetzten Cookies zurück.
     """
     session = requests.Session()
     
@@ -20,4 +20,4 @@ def get_ui_session(username, password):
     if "mail_sessions" in session.cookies:
         return session
         
-    raise Exception(f"Не вдалося авторизуватися через UI для {username}")
+    raise Exception(f"Login über UI für {username} fehlgeschlagen")

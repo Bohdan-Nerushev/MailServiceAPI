@@ -10,7 +10,7 @@ from tests import load_test
 
 def run_all():
     print("========================================")
-    print("ЗАПУСК ПОВНОГО ЦИКЛУ E2E ТЕСТУВАННЯ")
+    print("START DES VOLLSTÄNDIGEN E2E-TESTZYKLUS")
     print("========================================\n")
     
     test_modules = [
@@ -54,22 +54,22 @@ def run_all():
             elif hasattr(module, 'test_ui_system_pages'):
                 module.test_ui_system_pages()
                 
-            print(f"МОДУЛЬ {module.__name__} ПРОЙДЕНО.\n")
+            print(f"MODUL {module.__name__} BESTANDEN.\n")
             passed += 1
         except Exception as e:
-            print(f"!!! ПОМИЛКА У МОДУЛІ {module.__name__}: {e}\n")
+            print(f"!!! FEHLER IM MODUL {module.__name__}: {e}\n")
             failed += 1
 
     print("========================================")
-    print(f"РЕЗУЛЬТАТИ: Пройшло {passed}, Провалено {failed}")
+    print(f"ERGEBNISSE: Bestanden {passed}, Fehlgeschlagen {failed}")
     print("========================================")
     
     if failed > 0:
         sys.exit(1)
 
 if __name__ == "__main__":
-    # Запуск регулярних E2E тестів
+    # Start der regulären E2E-Tests
     run_all()
     
-    # Запуск лоад тестів після успішного проходження основних тестів
+    # Start der Lasttests nach erfolgreichem Abschluss der Haupttests
     load_test.run_load_test(num_users=10, rounds=3)

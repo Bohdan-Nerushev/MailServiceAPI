@@ -7,7 +7,7 @@ def test_mail_flow():
     """
     Позитивний тест: Відправка пошти -> Отримання інбоксу -> Видалення повідомлення.
     """
-    print("Запуск: test_mail_flow")
+    print("Start: test_mail_flow")
     
     # Створюємо двох користувачів (Аліса і Боб)
     alice = None
@@ -27,8 +27,8 @@ def test_mail_flow():
             "from_email": f"{alice['username']}@{config.DOMAIN}"
         }
         send_resp = requests.post(f"{config.BASE_URL}/mail/send", json=send_data, timeout=10)
-        assert send_resp.status_code == 200, f"Помилка відправки: {send_resp.text}"
-        print(f"  - Лист від {alice['username']} до {bob['username']} надіслано")
+        assert send_resp.status_code == 200, f"Fehler beim Senden: {send_resp.text}"
+        print(f"  - E-Mail von {alice['username']} an {bob['username']} gesendet")
 
         # Чекаємо трохи, поки Postfix/Dovecot оброблять лист
         time.sleep(2)
@@ -48,9 +48,9 @@ def test_mail_flow():
                 found_mail = m
                 break
         
-        assert found_mail is not None, "Лист не знайдено в інбоксі Боба"
+        assert found_mail is not None, "E-Mail nicht im Posteingang von Bob gefunden"
         uid = found_mail['uid']
-        print(f"  - Лист знайдено в інбоксі (UID: {uid})")
+        print(f"  - E-Mail im Posteingang gefunden (UID: {uid})")
 
         # 3. Отримання конкретної повідомлення (View Message)
         msg_resp = requests.get(
@@ -60,7 +60,7 @@ def test_mail_flow():
             timeout=10
         )
         assert msg_resp.status_code == 200
-        print("  - Вміст листа успішно отримано")
+        print("  - E-Mail-Inhalt erfolgreich abgerufen")
 
         # 4. Видалення повідомлення (Delete Message)
         del_resp = requests.delete(
@@ -70,7 +70,7 @@ def test_mail_flow():
             timeout=10
         )
         assert del_resp.status_code == 200
-        print("  - Лист успішно видалено")
+        print("  - E-Mail erfolgreich gelöscht")
 
     finally:
         if alice:
@@ -82,7 +82,7 @@ def test_send_mail_invalid():
     """
     Негативний тест: Відправка на некоректну адресу.
     """
-    print("Запуск: test_send_mail_invalid")
+    print("Start: test_send_mail_invalid")
     send_data = {
         "to": "invalid-email-address",
         "subject": "Test",
@@ -93,13 +93,13 @@ def test_send_mail_invalid():
     resp = requests.post(f"{config.BASE_URL}/mail/send", json=send_data, timeout=10)
     print(f"  - Status code for invalid mail: {resp.status_code}")
     assert resp.status_code in [400, 422, 500] 
-    print("  - Перевірка валідації email (422) пройдена")
+    print("  - E-Mail-Validierung (422) bestanden")
 
 def test_api_access_alien_mail():
     """
     Негативний тест: Спроба доступу до чужого листа через API.
     """
-    print("Запуск: test_api_access_alien_mail")
+    print("Start: test_api_access_alien_mail")
     user1 = None
     user2 = None
     
@@ -123,7 +123,7 @@ def test_api_access_alien_mail():
         )
         inbox = resp.json().get("inbox", [])
         if not inbox:
-            print("  - Скіп: Лист не знайдено в інбоксі")
+            print("  - Skip: E-Mail nicht im Posteingang gefunden")
             return
         uid = inbox[0]['uid']
         
@@ -135,7 +135,7 @@ def test_api_access_alien_mail():
             timeout=10
         )
         assert alien_resp.status_code in [404, 500, 403]
-        print("  - Заборона доступу до чужої пошти пройдена")
+        print("  - Verbot des Zugriffs auf fremde E-Mails bestanden")
         
     finally:
         if user1:
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         test_mail_flow()
         test_send_mail_invalid()
         test_api_access_alien_mail()
-        print("Усі E2E тести Mail API (позитивні та негативні) пройшли успішно!\n")
+        print("Alle E2E Tests Mail API (positiv & negativ) erfolgreich bestanden!\n")
     except Exception as e:
-        print(f"Тест провалено: {e}")
+        print(f"Test fehlgeschlagen: {e}")
         exit(1)

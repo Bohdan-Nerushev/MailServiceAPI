@@ -7,7 +7,7 @@ def test_ui_mail_cycle():
     """
     Позитивний тест UI: Compose -> Send -> Inbox -> Trash -> Restore -> Permanent Delete.
     """
-    print("Запуск: test_ui_mail_cycle (повний цикл)")
+    print("Start: test_ui_mail_cycle (vollständiger Zyklus)")
     user = None
     try:
         user = user_helper.create_unique_user()
@@ -27,21 +27,21 @@ def test_ui_mail_cycle():
         # Спробуємо розпарсити UID з посилання /ui/mail/{uid}
         import re
         match = re.search(r'/ui/mail/(\d+)', inbox_resp.text)
-        assert match, "Не вдалося знайти UID листа в інбоксі через UI"
+        assert match, "E-Mail-UID im Posteingang über UI nicht gefunden"
         uid = match.group(1)
-        print(f"  - Лист знайдено, UID: {uid}")
+        print(f"  - E-Mail gefunden, UID: {uid}")
 
         # 3. Переміщення в кошик (Move to Trash)
         del_resp = session.post(f"{config.BASE_URL}/ui/mail/{uid}/delete", data={"folder": "INBOX"}, allow_redirects=True, timeout=10)
         if del_resp.status_code != 200:
             print(f"  - ERROR: Status {del_resp.status_code}, Response: {del_resp.text[:500]}")
         assert del_resp.status_code == 200
-        print("  - Лист переміщено в кошик")
+        print("  - E-Mail in den Papierkorb verschoben")
 
         # 4. Перевірка в папці Trash
         trash_resp = session.get(f"{config.BASE_URL}/ui/inbox", params={"folder": "Trash"}, timeout=10)
         assert subject in trash_resp.text
-        print("  - Лист підтверджено в папці Trash")
+        print("  - E-Mail im Papierkorb bestätigt")
 
         # 5. Відновлення з кошика (Restore)
         restore_resp = session.post(f"{config.BASE_URL}/ui/mail/{uid}/restore", allow_redirects=True, timeout=10)
@@ -49,7 +49,7 @@ def test_ui_mail_cycle():
         
         inbox_again = session.get(f"{config.BASE_URL}/ui/inbox", timeout=10)
         assert subject in inbox_again.text
-        print("  - Лист успішно відновлено в INBOX")
+        print("  - E-Mail erfolgreich in den INBOX wiederhergestellt")
 
         # 6. Остаточне видалення (Permanent Delete)
         # Спочатку знову в кошик
@@ -59,7 +59,7 @@ def test_ui_mail_cycle():
         
         trash_final = session.get(f"{config.BASE_URL}/ui/inbox", params={"folder": "Trash"}, timeout=10)
         assert subject not in trash_final.text
-        print("  - Лист остаточно видалено з кошика")
+        print("  - E-Mail endgültig aus dem Papierkorb gelöscht")
 
     finally:
         if user:
@@ -82,7 +82,7 @@ def test_ui_compose_empty_fields():
         )
         # Очікуємо помилку або повернення до форми
         assert "compose" in resp.url or "error" in resp.text.lower()
-        print("  - Валідація порожніх полів при відправці через UI пройдена")
+        print("  - Validierung leerer Felder beim Senden über UI bestanden")
     finally:
         if user:
             user_helper.delete_user(user['username'], user['password'])
@@ -91,7 +91,7 @@ def test_ui_cross_user_mail():
     """
     Позитивний тест UI: Alice -> Send Mail -> Bob -> Check Inbox.
     """
-    print("Запуск: test_ui_cross_user_mail (User 1 -> User 2)")
+    print("Start: test_ui_cross_user_mail (Benutzer 1 -> Benutzer 2)")
     
     alice = None
     bob = None
@@ -107,15 +107,15 @@ def test_ui_cross_user_mail():
             data={"to": f"{bob['username']}@{config.DOMAIN}", "subject": subject, "body": "Hi Bob!"},
             timeout=10
         )
-        print(f"  - Alice ({alice['username']}) надіслала лист Бобу ({bob['username']})")
+        print(f"  - Alice ({alice['username']}) hat eine E-Mail an Bob ({bob['username']}) gesendet")
         time.sleep(2)
 
         # 2. Bob логіниться та перевіряє Inbox
         bob_session = auth_helper.get_ui_session(bob['username'], bob['password'])
         inbox_resp = bob_session.get(f"{config.BASE_URL}/ui/inbox", timeout=10)
         
-        assert subject in inbox_resp.text, f"Лист з темою '{subject}' не знайдено в інбоксі Боба"
-        print(f"  - Bob ({bob['username']}) отримав лист від Alice")
+        assert subject in inbox_resp.text, f"E-Mail mit Betreff '{subject}' nicht im Posteingang von Bob gefunden"
+        print(f"  - Bob ({bob['username']}) hat die E-Mail von Alice erhalten")
 
     finally:
         if alice:
@@ -128,9 +128,9 @@ if __name__ == "__main__":
         test_ui_mail_cycle()
         test_ui_compose_empty_fields()
         test_ui_cross_user_mail()
-        print("Усі E2E тести Mail UI (позитивні та негативні) пройшли успішно!\n")
+        print("Alle E2E Tests Mail UI (positiv & negativ) erfolgreich bestanden!\n")
     except Exception as e:
-        print(f"Тест провалено: {e}")
+        print(f"Test fehlgeschlagen: {e}")
         import traceback
         traceback.print_exc()
         exit(1)
