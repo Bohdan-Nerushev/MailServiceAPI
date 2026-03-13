@@ -114,23 +114,64 @@ Die API stellt Prometheus-kompatible Metriken unter `/metrics` bereit.
 
 ### Dienst-Status prüfen
 ```bash
-sudo systemctl status mail-api
-sudo systemctl status postfix
-sudo systemctl status dovecot
+# Status aller wichtigen Dienste auf einmal prüfen
+sudo systemctl status mail-api postfix dovecot nginx
 ```
 
-### Protokolle (Logs)
+### 📋 Protokolle (Logs & Fehlerbehebung)
+
+#### 1. API-Dienst (mail-api)
 ```bash
-tail -f app.log                # API Anwendungs-Logs
-tail -f /var/log/mail.log       # Mailserver-Logs
-docker-compose logs -f          # Monitoring-Stack Logs
+# Echtzeit-Logs des Systemd-Dienstes
+sudo journalctl -u mail-api -f
+
+# Logs aus der Datei (falls konfiguriert)
+tail -f app.log
+```
+
+#### 2. Mailserver (Postfix & Dovecot)
+```bash
+# SMTP- und IMAP-Ereignisse (System-Mail-Log)
+sudo tail -f /var/log/mail.log
+
+# Dienst-spezifische Journals
+sudo journalctl -u postfix -f
+sudo journalctl -u dovecot -f
+```
+
+#### 3. Webserver (Nginx)
+```bash
+# Zugriffs-Protokolle (Access Logs)
+sudo tail -f /var/log/nginx/access.log
+
+# Fehlersuche (Error Logs)
+sudo tail -f /var/log/nginx/error.log
+```
+
+#### 4. Monitoring-Stack (Docker)
+```bash
+# Logs aller Docker-Container des Stacks
+docker-compose logs -f
+```
+
+### 📈 Visualisierung in Grafana (Loki)
+Für eine konsolidierte Ansicht nutzen Sie **Grafana Explore**:
+1. Öffnen Sie `http://ihre-server-ip/monitoring/`.
+2. Gehen Sie zum Bereich **Explore**.
+3. Wählen Sie **Loki** als Datenquelle.
+4. Filter nutzen: `{job="fastapi"}` oder `{job="docker_logs"}`.
+
+### Schneller System-Check
+```bash
+# Aktuelle Systemauslastung (CPU, RAM, Prozesse)
+top
 ```
 
 ### Konfiguration validieren
 ```bash
-postconf -n                     # Aktive Postfix-Konfiguration
-doveconf -n                     # Aktive Dovecot-Konfiguration
-nginx -t                        # Nginx Syntax-Prüfung
+postconf -n                     # Postfix-Konfiguration prüfen
+doveconf -n                     # Dovecot-Konfiguration prüfen
+nginx -t                        # Nginx-Syntax validieren
 ```
 
 ---
